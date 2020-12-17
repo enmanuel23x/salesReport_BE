@@ -87,9 +87,10 @@ CREATE TABLE IF NOT EXISTS `copyOIC`.`users` (
 
 DROP TABLE IF EXISTS `copyOIC`.`habiles`;
 CREATE TABLE IF NOT EXISTS `copyOIC`.`habiles` (
-    `hbl_id` int(11) NOT NULL AUTO_INCREMENT,
-    `hbl_month` varchar(15) NOT NULL,
-    `hbl_year` varchar(15) NOT NULL,
-    `hbl_holidays` json,
-    PRIMARY KEY (`hbl_id`)
+  `hbl_id` int(11) NOT NULL AUTO_INCREMENT,
+  `hbl_date` date DEFAULT NULL,
+  `hbl_holidays` json DEFAULT NULL,
+  `hbl_days` varchar(50) DEFAULT '1',
+  `hbl_habiles_5` date DEFAULT NULL,
+  PRIMARY KEY (`hbl_id`)
 );
