@@ -1,5 +1,4 @@
 const pool = require('../../database/conn/database');
-const { param } = require('../routes/userRouter');
 
 module.exports = {
 
