@@ -2,9 +2,9 @@ SELECT
 	cli.CLIENTE AS 'CODIGO CLIENTE',
  	base.agr AS 'Agrupación',
  	base.MARCA AS 'MARCA',
- 	base.promvtas AS 'PROMEDIO VTAS',
- 	base2.sumvtas AS 'VTAS DEL MES',
- 	((base2.sumvtas/base.promvtas)*100) AS 'ALCANCE %',
+ 	ROUND(base.promvtas,2) AS 'PROMEDIO VTAS',
+ 	ROUND(base2.sumvtas,2) AS 'VTAS DEL MES',
+ 	ROUND(((base2.sumvtas/base.promvtas)*100),2) AS 'ALCANCE %',
  	vendedor.COD AS 'Codigo Vendedor',
  	vendedor.NOMBRE AS 'Vendedor',
  	vendedor.ACTIVO AS 'Vendedor Activo'

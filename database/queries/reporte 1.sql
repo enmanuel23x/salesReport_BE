@@ -1,9 +1,9 @@
 SELECT 
  	base.agr AS 'Agrupación',
- 	base.promvtas AS 'Promedio de ventas',
- 	base.lastmonth AS 'Mes Anterior',
- 	base.alc AS 'Alcance',
- 	vtassum.VtaTotal AS 'Ventas',
+ 	ROUND(base.promvtas, 2) AS 'Promedio de ventas',
+ 	ROUND(base.lastmonth, 2) AS 'Mes Anterior',
+ 	ROUND(base.alc, 2) AS 'Alcance',
+ 	ROUND(vtassum.VtaTotal, 2) AS 'Ventas',
  	vendedor.COD AS 'Codigo Vendedor',
  	vendedor.NOMBRE AS 'Vendedor'
 				

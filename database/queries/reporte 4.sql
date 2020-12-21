@@ -3,9 +3,9 @@ SELECT
  	base.agr AS 'Agrupación',
  	base.ARTICULO AS 'ARTICULO',
  	base.DESCRIPCION AS 'DESCRIPCION',
-	base.promvtas AS 'PROMEDIO VTAS',
-	base.promvtasu AS 'PROMEDIO VTAS UNID',
-	base2.sumvtasu AS 'VTAS MES ACTUAL UNID',
+	ROUND(base.promvtas,2) AS 'PROMEDIO VTAS',
+	ROUND(base.promvtasu,2) AS 'PROMEDIO VTAS UNID',
+	ROUND(base2.sumvtasu,2) AS 'VTAS MES ACTUAL UNID',
  	vendedor.COD AS 'Codigo Vendedor',
  	vendedor.NOMBRE AS 'Vendedor'
 				

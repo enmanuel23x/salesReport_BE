@@ -94,3 +94,59 @@ CREATE TABLE IF NOT EXISTS `copyOIC`.`habiles` (
   `hbl_habiles_5` date DEFAULT NULL,
   PRIMARY KEY (`hbl_id`)
 );
+
+
+-- Tablas de Reportes
+
+DROP TABLE IF EXISTS `copyOIC`.`report_1`;
+CREATE TABLE IF NOT EXISTS `copyOIC`.`report_1` (
+	`rpt1_group` varchar(256) DEFAULT NULL,
+	`rpt1_avg_sales` varchar(256) DEFAULT NULL,
+  	`rpt1_last_month` varchar(256) DEFAULT NULL,
+  	`rpt1_scope` varchar(256) DEFAULT NULL,
+  	`rpt1_sales` varchar(256) DEFAULT NULL,
+  	`rpt1_seller_code` varchar(256) DEFAULT NULL,
+  	`rpt1_seller` varchar(256) DEFAULT NULL,
+	`rpt1_date` date DEFAULT NULL
+);
+
+DROP TABLE IF EXISTS `copyOIC`.`report_2`;
+CREATE TABLE IF NOT EXISTS `copyOIC`.`report_2` (
+	`rpt2_group` varchar(256) DEFAULT NULL,
+	`rpt2_abc` varchar(256) DEFAULT NULL,
+	`rpt2_avg_sales_weekly` varchar(256) DEFAULT NULL,
+  	`rpt2_first_week` varchar(256) DEFAULT NULL,
+  	`rpt2_scope` varchar(256) DEFAULT NULL,
+  	`rpt2_seller_code` varchar(256) DEFAULT NULL,
+  	`rpt2_seller` varchar(256) DEFAULT NULL,
+	`rpt2_seller_active` varchar(256) DEFAULT NULL,
+	`rpt2_date` date DEFAULT NULL
+);
+
+DROP TABLE IF EXISTS `copyOIC`.`report_3`;
+CREATE TABLE IF NOT EXISTS `copyOIC`.`report_3` (
+	`rpt3_client_code` varchar(256) DEFAULT NULL,
+	`rpt3_group` varchar(256) DEFAULT NULL,
+	`rpt3_brand` varchar(256) DEFAULT NULL,
+	`rpt3_avg_sales` varchar(256) DEFAULT NULL,
+  	`rpt3_month_sales` varchar(256) DEFAULT NULL,
+  	`rpt3_scope_perc` varchar(256) DEFAULT NULL,
+  	`rpt3_seller_code` varchar(256) DEFAULT NULL,
+  	`rpt3_seller` varchar(256) DEFAULT NULL,
+	`rpt3_seller_active` varchar(256) DEFAULT NULL,
+	`rpt3_date` date DEFAULT NULL
+);
+
+DROP TABLE IF EXISTS `copyOIC`.`report_4`;
+CREATE TABLE IF NOT EXISTS `copyOIC`.`report_4` (
+	`rpt4_client_code` varchar(256) DEFAULT NULL,
+	`rpt4_group` varchar(256) DEFAULT NULL,
+	`rpt4_article` varchar(256) DEFAULT NULL,
+	`rpt4_description` varchar(256) DEFAULT NULL,
+	`rpt4_avg_sales` varchar(256) DEFAULT NULL,
+	`rpt4_avg_sales_units` varchar(256) DEFAULT NULL,
+  	`rpt4_month_sales_units` varchar(256) DEFAULT NULL,
+  	`rpt4_seller_code` varchar(256) DEFAULT NULL,
+  	`rpt4_seller` varchar(256) DEFAULT NULL,
+	`rpt4_date` date DEFAULT NULL
+);

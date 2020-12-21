@@ -1,8 +1,8 @@
 SELECT 
  	base.agr AS 'Agrupación',
- 	((base.promvtas / hbl.days)*5) AS 'PROMEDIO VTA SEMANAL',
- 	semana.sumvtas AS 'VENTA SEMANA 1',
- 	( semana.sumvtas / ((base.promvtas / hbl.days)*5)) AS 'ALCANCE',
+ 	ROUND(((base.promvtas / hbl.days)*5),2) AS 'PROMEDIO VTA SEMANAL',
+ 	ROUND(semana.sumvtas,2) AS 'VENTA SEMANA 1',
+ 	ROUND(( semana.sumvtas / ((base.promvtas / hbl.days)*5)),2) AS 'ALCANCE',
  	vendedor.COD AS 'Codigo Vendedor',
  	vendedor.NOMBRE AS 'Vendedor',
  	vendedor.ACTIVO AS 'Vendedor Activo'
