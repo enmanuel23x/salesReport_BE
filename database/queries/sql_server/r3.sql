@@ -13,34 +13,35 @@ FROM cliente_oic AS cli
 LEFT JOIN 
 		(
 	 		SELECT 
+			 	x.CLIENTE as CLIENTE, 
 			 	x.U_Agrupacion AS agr,
 			 	x.CLASIFICACION_3_DES AS MARCA,
 			 	(SUM(x.VTAS) / NULLIF(COUNT( DISTINCT( MONTH(x.FECHA) ) ), 0)  ) AS promvtas
 			FROM base_oic2 AS x
 			WHERE 
-             x.Fecha Between DATEADD(m, -6, GETDATE()) and DATEADD(m, DATEDIFF(m, 0, GETDATE()), 0)
+             x.Fecha Between  DATEADD(m, DATEDIFF(m, 0, DATEADD(m, -6, GETDATE())), 0) and DATEADD(m, DATEDIFF(m, 0, GETDATE()), 0)
 	         AND
             (x.VTAS > 0 OR x.VTAS < 0)
          GROUP BY 
-	         x.U_Agrupacion, x.CLASIFICACION_3_DES
+	         x.CLIENTE, x.U_Agrupacion, x.CLASIFICACION_3_DES
 			) AS base
-	ON ( cli.RAZON_SOCIAL = base.agr )
+	ON ( cli.CLIENTE = base.CLIENTE )
 LEFT JOIN 
 		(
-	 		SELECT 
+	 		SELECT
+			 	x.CLIENTE as CLIENTE, 
 			 	x.U_Agrupacion AS agr,
+				x.CLASIFICACION_3_DES AS MARCA,
 			 	SUM(x.VTAS) AS sumvtas
 			FROM base_oic2 AS x
 			WHERE 
-				YEAR(x.FECHA) = YEAR(GETDATE()) 
-				AND 
-				MONTH(x.FECHA) = MONTH(GETDATE())
+				x.Fecha Between DATEADD(m, DATEDIFF(m, 0, DATEADD(m, 0, GETDATE())), 0) and DATEADD(m, DATEDIFF(m, 0, DATEADD(m, 1, GETDATE())), 0)
 				AND
             (x.VTAS > 0 OR x.VTAS < 0)
          GROUP BY 
-	         x.U_Agrupacion, x.CLASIFICACION_3_DES
+	         x.CLIENTE, x.U_Agrupacion, x.CLASIFICACION_3_DES
 			) AS base2
-	ON ( cli.RAZON_SOCIAL = base2.agr )
+	ON ( cli.CLIENTE = base2.CLIENTE AND base.MARCA = base2.MARCA )
 	
 	LEFT JOIN (
 		SELECT 
@@ -53,7 +54,5 @@ LEFT JOIN
 	ON ( cli.CODIGO_VENDEDOR = vendedor.COD )
 	WHERE 
 		base.agr IS NOT NULL
-		AND
-		base2.sumvtas IS NOT NULL
 	ORDER BY cli.CLIENTE
 	;

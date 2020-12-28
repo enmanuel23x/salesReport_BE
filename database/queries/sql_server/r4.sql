@@ -12,7 +12,8 @@ SELECT
 FROM cliente_oic AS cli 
 LEFT JOIN 
 		(
-	 		SELECT 
+	 		SELECT
+			 	x.CLIENTE as CLIENTE, 
 			 	x.U_Agrupacion AS agr,
 			 	x.ARTICULO AS ARTICULO,
 			 	x.DESCRIPCION AS DESCRIPCION,
@@ -20,29 +21,29 @@ LEFT JOIN
 			 	(SUM(x.CANTIDAD) / NULLIF(COUNT( DISTINCT( MONTH(x.FECHA) ) ), 0)  ) AS promvtasu
 			FROM base_oic2 AS x
 			WHERE
-                x.Fecha Between DATEADD(m, -6, GETDATE()) and DATEADD(m, DATEDIFF(m, 0, GETDATE()), 0) 
+                x.Fecha Between  DATEADD(m, DATEDIFF(m, 0, DATEADD(m, -6, GETDATE())), 0) and DATEADD(m, DATEDIFF(m, 0, GETDATE()), 0)
 	            AND
                 (x.VTAS > 0 OR x.VTAS < 0)
          GROUP BY 
-	         x.U_Agrupacion, x.ARTICULO, x.DESCRIPCION
+	        	x.CLIENTE, x.U_Agrupacion, x.ARTICULO, x.DESCRIPCION
 			) AS base
-		ON ( cli.RAZON_SOCIAL = base.agr )
+		ON ( cli.CLIENTE = base.CLIENTE )
 	LEFT JOIN 
 		(
-	 		SELECT 
+	 		SELECT
+			 	x.CLIENTE as CLIENTE, 
 			 	x.U_Agrupacion AS agr,
-			 	SUM(x.CANTIDAD) AS sumvtasu
+			 	SUM(x.CANTIDAD) AS sumvtasu,
+				x.ARTICULO AS ARTICULO
 			FROM base_oic2 AS x
-			WHERE 
-				YEAR(x.FECHA) = YEAR(GETDATE()) 
-				AND 
-				MONTH(x.FECHA) = MONTH(GETDATE())
+			WHERE
+				x.Fecha Between DATEADD(m, DATEDIFF(m, 0, DATEADD(m, 0, GETDATE())), 0) and DATEADD(m, DATEDIFF(m, 0, DATEADD(m, 1, GETDATE())), 0) 
 				AND
                 (x.VTAS > 0 OR x.VTAS < 0)
          GROUP BY 
-	         x.U_Agrupacion, x.ARTICULO
+	         	x.CLIENTE, x.U_Agrupacion, x.ARTICULO
 			) AS base2
-	ON ( cli.RAZON_SOCIAL = base2.agr )
+	ON ( cli.CLIENTE = base2.CLIENTE AND base.ARTICULO = base2.ARTICULO)
 	LEFT JOIN (
 		SELECT 
 			VENDEDOR AS COD,
