@@ -105,15 +105,16 @@ CREATE TABLE IF NOT EXISTS `copyOIC`.`report_1` (
   	`rpt1_last_month` varchar(256) DEFAULT NULL,
   	`rpt1_scope` varchar(256) DEFAULT NULL,
   	`rpt1_sales` varchar(256) DEFAULT NULL,
+	`rpt1_abc` varchar(10) DEFAULT NULL,
   	`rpt1_seller_code` varchar(256) DEFAULT NULL,
   	`rpt1_seller` varchar(256) DEFAULT NULL,
+	`rpt1_seller_active` varchar(256) DEFAULT NULL,
 	`rpt1_date` date DEFAULT NULL
 );
 
 DROP TABLE IF EXISTS `copyOIC`.`report_2`;
 CREATE TABLE IF NOT EXISTS `copyOIC`.`report_2` (
 	`rpt2_group` varchar(256) DEFAULT NULL,
-	`rpt2_abc` varchar(256) DEFAULT NULL,
 	`rpt2_avg_sales_weekly` varchar(256) DEFAULT NULL,
   	`rpt2_first_week` varchar(256) DEFAULT NULL,
   	`rpt2_scope` varchar(256) DEFAULT NULL,
@@ -148,5 +149,7 @@ CREATE TABLE IF NOT EXISTS `copyOIC`.`report_4` (
   	`rpt4_month_sales_units` varchar(256) DEFAULT NULL,
   	`rpt4_seller_code` varchar(256) DEFAULT NULL,
   	`rpt4_seller` varchar(256) DEFAULT NULL,
+	`rpt4_class` varchar(256) DEFAULT NULL,
+	`rpt4_brand` varchar(256) DEFAULT NULL,
 	`rpt4_date` date DEFAULT NULL
 );

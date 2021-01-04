@@ -7,7 +7,9 @@ SELECT
 	ROUND(base.promvtasu,2) AS 'PROMEDIO VTAS UNID',
 	ROUND(base2.sumvtasu,2) AS 'VTAS MES ACTUAL UNID',
  	vendedor.COD AS 'Codigo Vendedor',
- 	vendedor.NOMBRE AS 'Vendedor'
+ 	vendedor.NOMBRE AS 'Vendedor',
+	base.MARCA AS 'Marca',
+	base.CLAS AS 'Clasificacion'
 				
 FROM cliente_oic AS cli 
 LEFT JOIN 
@@ -17,6 +19,8 @@ LEFT JOIN
 			 	x.U_Agrupacion AS agr,
 			 	x.ARTICULO AS ARTICULO,
 			 	x.DESCRIPCION AS DESCRIPCION,
+				x.CLASIFICACION_5_DES AS CLAS,
+				x.CLASIFICACION_3_DES AS MARCA,
 			 	(SUM(x.VTAS) / NULLIF(COUNT( DISTINCT( MONTH(x.FECHA) ) ), 0)  ) AS promvtas,
 			 	(SUM(x.CANTIDAD) / NULLIF(COUNT( DISTINCT( MONTH(x.FECHA) ) ), 0)  ) AS promvtasu
 			FROM base_oic2 AS x
@@ -25,7 +29,7 @@ LEFT JOIN
 	            AND
                 (x.VTAS > 0 OR x.VTAS < 0)
          GROUP BY 
-	        	x.CLIENTE, x.U_Agrupacion, x.ARTICULO, x.DESCRIPCION
+	        	x.CLIENTE, x.U_Agrupacion, x.ARTICULO, x.DESCRIPCION, x.CLASIFICACION_5_DES, x.CLASIFICACION_3_DES
 			) AS base
 		ON ( cli.CLIENTE = base.CLIENTE )
 	LEFT JOIN 
