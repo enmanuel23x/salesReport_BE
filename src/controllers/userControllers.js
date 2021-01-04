@@ -13,7 +13,8 @@ module.exports = {
                     usrEmail: el.usr_email,
                     usrRol: el.usr_rol,
                     usrStatus: el.usr_status,
-                    cliId: el.cli_id
+                    cliId: el.cli_id,
+                    cliName: el.cli_name
                 }
             }))
         } catch (error) {
@@ -33,7 +34,8 @@ module.exports = {
                 usrEmail: result[0].usr_email,
                 usrRol: result[0].usr_rol,
                 usrStatus: result[0].usr_status,
-                cliId: result[0].cli_id
+                cliId: result[0].cli_id,
+                cliName: result[0].cli_name
             });
         } catch (error) {
             console.error(error);
@@ -43,7 +45,20 @@ module.exports = {
     async getUsersByEmail(req, res, next) {
         try {
             const usr_email = req.params.email;
-            const result = await pool.query('SELECT * FROM users WHERE usr_email = ' + usr_email);
+            const query = `
+                SELECT 
+	                us.*, cli.cli_name AS cli_name 
+                FROM 
+	                users AS us 
+                LEFT JOIN 
+	                (SELECT * FROM clients) 
+		            AS cli 
+                ON 
+                    (us.cli_id = cli.cli_id)
+                WHERE 
+	                usr_email = "${usr_email}" ;
+            `
+            const result = await pool.query(query);
             res.json({
                 usrId: result[0].usr_id,
                 usrName: result[0].usr_name,
@@ -51,7 +66,8 @@ module.exports = {
                 usrEmail: result[0].usr_email,
                 usrRol: result[0].usr_rol,
                 usrStatus: result[0].usr_status,
-                cliId: result[0].cli_id
+                cliId: result[0].cli_id,
+                cliName: result[0].cli_name
             });
         } catch (error) {
             console.error(error);
