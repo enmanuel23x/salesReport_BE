@@ -25,8 +25,8 @@ module.exports = {
             if( SellerName != undefined){
                 query += ` AND rpt1_seller RLIKE "` + SellerName + `"`;
             }
-            console.log(query)
-            const result = await pool.query(query)
+            console.log(query+";")
+            const result = await pool.query(query+";")
             console.log(result)
             res.json(result)
         } catch (error) {
