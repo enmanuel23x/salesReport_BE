@@ -26,6 +26,7 @@ module.exports = {
                 query += ` AND rpt1_seller RLIKE "` + SellerName + `"`;
             }
             const result = await pool.query(query)
+            
             res.json(result)
         } catch (error) {
             console.error(error)
@@ -65,6 +66,27 @@ module.exports = {
         }
     },
 
+    async get_report_3_top20_clients (req, res, next) {
+
+        try {
+            const { SellerActive, SellerName } = req.body;
+            let query = `SELECT distinct rpt3_client_code, rpt3_group FROM report_3 WHERE MONTH(rpt3_date) = MONTH(NOW()) AND YEAR(rpt3_date) = YEAR(NOW())`
+            if( SellerActive != undefined){
+                query += ` AND rpt3_seller_active = "` + SellerActive + `"`;
+            }
+            if( SellerName != undefined){
+                query += ` AND rpt3_seller RLIKE "` + SellerName + `"`;
+            }
+            query += `order by rpt3_group asc limit 20`;
+
+            const result = await pool.query(query)
+            res.json(result)
+        } catch (error) {
+            console.error(error)
+            res.send("ERROR")
+        }
+    },
+
     async get_report_3 (req, res, next) {
         /* 
         Example JSON:
@@ -73,17 +95,25 @@ module.exports = {
             "SellerActive": "S"
             }
         
-        */
+        */  
        try {
-            const { SellerActive, SellerName } = req.body;
-            let query = `select * from report_3 WHERE MONTH(rpt3_date) = MONTH(NOW()) AND YEAR(rpt3_date) = YEAR(NOW())`
+            const { SellerActive, SellerName, Clients } = req.body;
+            let inClients='';
+
+            Clients.forEach(element => {  inClients += `'${element.rpt3_client_code}',` })
+            inClients = inClients.slice(0, -1);
+            
+            let query = `SELECT * FROM copyoic.report_3 WHERE MONTH(rpt3_date) = MONTH(NOW()) AND YEAR(rpt3_date) = YEAR(NOW())`
+            //let query = `select * from report_3 WHERE MONTH(rpt3_date) = MONTH(NOW()) AND YEAR(rpt3_date) = YEAR(NOW())`
             if( SellerActive != undefined){
                 query += ` AND rpt3_seller_active = "` + SellerActive + `"`;
             }
             if( SellerName != undefined){
                 query += ` AND rpt3_seller RLIKE "` + SellerName + `"`;
             }
+            query += `AND rpt3_client_code IN (${inClients}) order by rpt3_group asc`;
             const result = await pool.query(query)
+
             res.json(result)
         } catch (error) {
             console.error(error)
