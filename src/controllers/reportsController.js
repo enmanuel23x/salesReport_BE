@@ -118,7 +118,6 @@ module.exports = {
             }
             query += `AND rpt3_client_code IN (${inClients}) order by rpt3_group asc`;
             const result = await pool.query(query)
-            console.log('este el query:', query)
 
             res.json(result)
         } catch (error) {
