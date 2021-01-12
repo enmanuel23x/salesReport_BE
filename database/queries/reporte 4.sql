@@ -8,8 +8,9 @@ SELECT
 	ROUND(base2.sumvtasu,2) AS 'VTAS MES ACTUAL UNID',
  	vendedor.COD AS 'Codigo Vendedor',
  	vendedor.NOMBRE AS 'Vendedor',
-	base.MARCA AS 'Marca',
-	base.CLAS AS 'Clasificacion'
+ 	base.CLAS AS 'Clasificacion',
+	base.MARCA AS 'Marca'
+	
 				
 FROM cliente_oic AS cli 
 LEFT JOIN 

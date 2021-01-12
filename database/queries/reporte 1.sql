@@ -4,7 +4,9 @@ SELECT
  	ROUND(base.lastmonth, 2) AS 'Mes Anterior',
  	ROUND(base.alc*100, 2) AS 'Alcance',
  	vendedor.COD AS 'Codigo Vendedor',
- 	vendedor.NOMBRE AS 'Vendedor'
+ 	vendedor.NOMBRE AS 'Vendedor',
+ 	vendedor.ACTIVO AS 'Vendedor Activo',
+ 	NOW() AS 'Date'
 				
 FROM 
 	cliente_oic AS cli 
@@ -46,7 +48,8 @@ LEFT JOIN
 LEFT JOIN (
 	SELECT 
 		VENDEDOR AS COD,
-		NOMBRE
+		NOMBRE,
+		ACTIVO
 	FROM 
 	    oic_vendedor
 	)  AS vendedor

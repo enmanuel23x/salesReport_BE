@@ -55,5 +55,5 @@ LEFT JOIN
 	ON ( cli.CODIGO_VENDEDOR = vendedor.COD )
 	WHERE 
 		base.agr IS NOT NULL
-	ORDER BY cli.CLIENTE
+	ORDER BY cli.CLIENTE, base.MARCA
 	;
