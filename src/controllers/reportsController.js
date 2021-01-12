@@ -103,11 +103,19 @@ module.exports = {
                 Clients.forEach(element => {  inClients += `'${element.rpt3_client_code}',` })
                 inClients = inClients.slice(0, -1);
                 let query = `SELECT *, 
-                (select sum(CAST(rpt3_avg_sales AS DECIMAL(10,2))) from copyoic.report_3 where rpt3_client_code = a.rpt3_client_code) as sum_avg_sales, 
-                (select sum(CAST(rpt3_month_sales AS DECIMAL(10,2))) from copyoic.report_3 where rpt3_client_code = a.rpt3_client_code) as sum_month_sales,
-                (select sum(CAST(rpt3_scope_perc AS DECIMAL(10,2))) from copyoic.report_3 where rpt3_client_code = a.rpt3_client_code) as sum_scope_perc,
-                FORMAT((select (sum(CAST(rpt3_scope_perc AS DECIMAL(10,2)))/(select count(rpt3_scope_perc) from copyoic.report_3 where rpt3_client_code = a.rpt3_client_code)) as a from copyoic.report_3 where rpt3_client_code = a.rpt3_client_code),2) as prom_scope_perc,
-                (select count(rpt3_scope_perc) from copyoic.report_3 where rpt3_client_code = a.rpt3_client_code) as count_scope_perc FROM copyoic.report_3 as a WHERE MONTH(rpt3_date) = MONTH(NOW()) AND YEAR(rpt3_date) = YEAR(NOW())`
+                    (select sum(CAST(rpt3_avg_sales AS DECIMAL(10,2))) from copyoic.report_3 where rpt3_client_code = a.rpt3_client_code) as sum_avg_sales, 
+                    (select sum(CAST(rpt3_month_sales AS DECIMAL(10,2))) from copyoic.report_3 where rpt3_client_code = a.rpt3_client_code) as sum_month_sales,
+                    (select sum(CAST(rpt3_scope_perc AS DECIMAL(10,2))) from copyoic.report_3 where rpt3_client_code = a.rpt3_client_code) as sum_scope_perc,
+                    FORMAT((select (sum(CAST(rpt3_scope_perc AS DECIMAL(10,2)))/(select count(rpt3_scope_perc) from copyoic.report_3 where rpt3_client_code = a.rpt3_client_code)) as a from copyoic.report_3 where rpt3_client_code = a.rpt3_client_code),2) as prom_scope_perc,
+                    (select count(rpt3_scope_perc) from copyoic.report_3 where rpt3_client_code = a.rpt3_client_code) as count_scope_perc FROM copyoic.report_3 as a 
+                WHERE 
+                    MONTH(rpt3_date) = MONTH(NOW()) 
+                    AND 
+                    YEAR(rpt3_date) = YEAR(NOW())
+                    AND 
+                    rpt3_month_sales IS NOT NULL
+                    AND 
+                    rpt3_scope_perc IS NOT NULL`
                 //let query = `select * from report_3 WHERE MONTH(rpt3_date) = MONTH(NOW()) AND YEAR(rpt3_date) = YEAR(NOW())`
                 if( SellerActive != undefined){
                     query += ` AND rpt3_seller_active = "` + SellerActive + `"`;
