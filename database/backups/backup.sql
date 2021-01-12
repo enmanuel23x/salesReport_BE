@@ -13,10 +13,12 @@
 
 
 -- Volcando estructura de base de datos para copyoic
+DROP DATABASE IF EXISTS `copyoic`;
 CREATE DATABASE IF NOT EXISTS `copyoic` /*!40100 DEFAULT CHARACTER SET latin1 */;
 USE `copyoic`;
 
 -- Volcando estructura para tabla copyoic.base_oic2
+DROP TABLE IF EXISTS `base_oic2`;
 CREATE TABLE IF NOT EXISTS `base_oic2` (
   `CLIENTE` varchar(100) DEFAULT NULL,
   `NOMBRE` varchar(256) DEFAULT NULL,
@@ -52,7 +54,7 @@ CREATE TABLE IF NOT EXISTS `base_oic2` (
   `COSTO` decimal(38,8) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- Volcando datos para la tabla copyoic.base_oic2: ~2.961 rows (aproximadamente)
+-- Volcando datos para la tabla copyoic.base_oic2: ~3.000 rows (aproximadamente)
 DELETE FROM `base_oic2`;
 /*!40000 ALTER TABLE `base_oic2` DISABLE KEYS */;
 INSERT INTO `base_oic2` (`CLIENTE`, `NOMBRE`, `VENDEDOR`, `VENNOM`, `U_SEGMENTO`, `U_REGION_VTA`, `U_AGRUPACION`, `RUTA`, `ZONA`, `PROVINCIA`, `CANTON`, `DISTRITO`, `PEDIDO`, `MONEDA_FACTURA`, `TIPO_CAMBIO`, `ARTICULO`, `DESCRIPCION`, `CLASIFICACION_1`, `CLASIFICACION_1_DES`, `CLASIFICACION_2`, `CLASIFICACION_2_DES`, `CLASIFICACION_3`, `CLASIFICACION_3_DES`, `CLASIFICACION_4`, `CLASIFICACION_4_DES`, `CLASIFICACION_5`, `CLASIFICACION_5_DES`, `FECHA`, `CANTIDAD`, `VTAS`, `MARGEN`, `COSTO`) VALUES
@@ -3060,6 +3062,7 @@ INSERT INTO `base_oic2` (`CLIENTE`, `NOMBRE`, `VENDEDOR`, `VENNOM`, `U_SEGMENTO`
 /*!40000 ALTER TABLE `base_oic2` ENABLE KEYS */;
 
 -- Volcando estructura para tabla copyoic.cliente_oic
+DROP TABLE IF EXISTS `cliente_oic`;
 CREATE TABLE IF NOT EXISTS `cliente_oic` (
   `CLIENTE` varchar(50) DEFAULT NULL,
   `RAZON_SOCIAL` varchar(256) DEFAULT NULL,
@@ -4554,13 +4557,14 @@ INSERT INTO `cliente_oic` (`CLIENTE`, `RAZON_SOCIAL`, `PROVINCIA`, `CANTON`, `DI
 /*!40000 ALTER TABLE `cliente_oic` ENABLE KEYS */;
 
 -- Volcando estructura para tabla copyoic.clients
+DROP TABLE IF EXISTS `clients`;
 CREATE TABLE IF NOT EXISTS `clients` (
   `cli_id` int(11) NOT NULL AUTO_INCREMENT,
   `cli_name` varchar(45) NOT NULL,
   PRIMARY KEY (`cli_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
 
--- Volcando datos para la tabla copyoic.clients: ~4 rows (aproximadamente)
+-- Volcando datos para la tabla copyoic.clients: ~3 rows (aproximadamente)
 DELETE FROM `clients`;
 /*!40000 ALTER TABLE `clients` DISABLE KEYS */;
 INSERT INTO `clients` (`cli_id`, `cli_name`) VALUES
@@ -4570,6 +4574,7 @@ INSERT INTO `clients` (`cli_id`, `cli_name`) VALUES
 /*!40000 ALTER TABLE `clients` ENABLE KEYS */;
 
 -- Volcando estructura para tabla copyoic.habiles
+DROP TABLE IF EXISTS `habiles`;
 CREATE TABLE IF NOT EXISTS `habiles` (
   `hbl_id` int(11) NOT NULL AUTO_INCREMENT,
   `hbl_date` date DEFAULT NULL,
@@ -4587,6 +4592,7 @@ INSERT INTO `habiles` (`hbl_id`, `hbl_date`, `hbl_holidays`, `hbl_days`, `hbl_ha
 /*!40000 ALTER TABLE `habiles` ENABLE KEYS */;
 
 -- Volcando estructura para tabla copyoic.oic_vendedor
+DROP TABLE IF EXISTS `oic_vendedor`;
 CREATE TABLE IF NOT EXISTS `oic_vendedor` (
   `VENDEDOR` varchar(4) NOT NULL,
   `NOMBRE` varchar(40) NOT NULL,
@@ -4665,6 +4671,7 @@ INSERT INTO `oic_vendedor` (`VENDEDOR`, `NOMBRE`, `E_MAIL`, `ACTIVO`, `U_SUPERVI
 /*!40000 ALTER TABLE `oic_vendedor` ENABLE KEYS */;
 
 -- Volcando estructura para tabla copyoic.report_1
+DROP TABLE IF EXISTS `report_1`;
 CREATE TABLE IF NOT EXISTS `report_1` (
   `rpt1_group` varchar(256) DEFAULT NULL,
   `rpt1_avg_sales` varchar(256) DEFAULT NULL,
@@ -4677,7 +4684,7 @@ CREATE TABLE IF NOT EXISTS `report_1` (
   `rpt1_date` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- Volcando datos para la tabla copyoic.report_1: ~0 rows (aproximadamente)
+-- Volcando datos para la tabla copyoic.report_1: ~345 rows (aproximadamente)
 DELETE FROM `report_1`;
 /*!40000 ALTER TABLE `report_1` DISABLE KEYS */;
 INSERT INTO `report_1` (`rpt1_group`, `rpt1_avg_sales`, `rpt1_last_month`, `rpt1_scope`, `rpt1_abc`, `rpt1_seller_code`, `rpt1_seller`, `rpt1_seller_active`, `rpt1_date`) VALUES
@@ -5029,6 +5036,7 @@ INSERT INTO `report_1` (`rpt1_group`, `rpt1_avg_sales`, `rpt1_last_month`, `rpt1
 /*!40000 ALTER TABLE `report_1` ENABLE KEYS */;
 
 -- Volcando estructura para tabla copyoic.report_2
+DROP TABLE IF EXISTS `report_2`;
 CREATE TABLE IF NOT EXISTS `report_2` (
   `rpt2_group` varchar(256) DEFAULT NULL,
   `rpt2_avg_sales_weekly` varchar(256) DEFAULT NULL,
@@ -5040,7 +5048,7 @@ CREATE TABLE IF NOT EXISTS `report_2` (
   `rpt2_date` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- Volcando datos para la tabla copyoic.report_2: ~0 rows (aproximadamente)
+-- Volcando datos para la tabla copyoic.report_2: ~345 rows (aproximadamente)
 DELETE FROM `report_2`;
 /*!40000 ALTER TABLE `report_2` DISABLE KEYS */;
 INSERT INTO `report_2` (`rpt2_group`, `rpt2_avg_sales_weekly`, `rpt2_first_week`, `rpt2_scope`, `rpt2_seller_code`, `rpt2_seller`, `rpt2_seller_active`, `rpt2_date`) VALUES
@@ -5392,6 +5400,7 @@ INSERT INTO `report_2` (`rpt2_group`, `rpt2_avg_sales_weekly`, `rpt2_first_week`
 /*!40000 ALTER TABLE `report_2` ENABLE KEYS */;
 
 -- Volcando estructura para tabla copyoic.report_3
+DROP TABLE IF EXISTS `report_3`;
 CREATE TABLE IF NOT EXISTS `report_3` (
   `rpt3_client_code` varchar(256) DEFAULT NULL,
   `rpt3_group` varchar(256) DEFAULT NULL,
@@ -5405,7 +5414,7 @@ CREATE TABLE IF NOT EXISTS `report_3` (
   `rpt3_date` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- Volcando datos para la tabla copyoic.report_3: ~0 rows (aproximadamente)
+-- Volcando datos para la tabla copyoic.report_3: ~1.154 rows (aproximadamente)
 DELETE FROM `report_3`;
 /*!40000 ALTER TABLE `report_3` DISABLE KEYS */;
 INSERT INTO `report_3` (`rpt3_client_code`, `rpt3_group`, `rpt3_brand`, `rpt3_avg_sales`, `rpt3_month_sales`, `rpt3_scope_perc`, `rpt3_seller_code`, `rpt3_seller`, `rpt3_seller_active`, `rpt3_date`) VALUES
@@ -6566,6 +6575,7 @@ INSERT INTO `report_3` (`rpt3_client_code`, `rpt3_group`, `rpt3_brand`, `rpt3_av
 /*!40000 ALTER TABLE `report_3` ENABLE KEYS */;
 
 -- Volcando estructura para tabla copyoic.report_4
+DROP TABLE IF EXISTS `report_4`;
 CREATE TABLE IF NOT EXISTS `report_4` (
   `rpt4_client_code` varchar(256) DEFAULT NULL,
   `rpt4_group` varchar(256) DEFAULT NULL,
@@ -6581,7 +6591,7 @@ CREATE TABLE IF NOT EXISTS `report_4` (
   `rpt4_date` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- Volcando datos para la tabla copyoic.report_4: ~0 rows (aproximadamente)
+-- Volcando datos para la tabla copyoic.report_4: ~1.945 rows (aproximadamente)
 DELETE FROM `report_4`;
 /*!40000 ALTER TABLE `report_4` DISABLE KEYS */;
 INSERT INTO `report_4` (`rpt4_client_code`, `rpt4_group`, `rpt4_article`, `rpt4_description`, `rpt4_avg_sales`, `rpt4_avg_sales_units`, `rpt4_month_sales_units`, `rpt4_seller_code`, `rpt4_seller`, `rpt4_class`, `rpt4_brand`, `rpt4_date`) VALUES
@@ -8533,6 +8543,7 @@ INSERT INTO `report_4` (`rpt4_client_code`, `rpt4_group`, `rpt4_article`, `rpt4_
 /*!40000 ALTER TABLE `report_4` ENABLE KEYS */;
 
 -- Volcando estructura para tabla copyoic.users
+DROP TABLE IF EXISTS `users`;
 CREATE TABLE IF NOT EXISTS `users` (
   `usr_id` int(11) NOT NULL AUTO_INCREMENT,
   `usr_name` varchar(45) DEFAULT NULL,
