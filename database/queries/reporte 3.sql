@@ -4,7 +4,7 @@ SELECT
  	base.MARCA AS 'MARCA',
  	ROUND(base.promvtas,2) AS 'PROMEDIO VTAS',
  	ROUND(base2.sumvtas,2) AS 'VTAS DEL MES',
- 	ROUND(((base2.sumvtas/base.promvtas)*100),2) AS 'ALCANCE %',
+ 	ROUND(((base2.sumvtas/ NULLIF(base.promvtas, 0) )*100),2) AS 'ALCANCE %',
  	vendedor.COD AS 'Codigo Vendedor',
  	vendedor.NOMBRE AS 'Vendedor',
  	vendedor.ACTIVO AS 'Vendedor Activo'
@@ -13,34 +13,36 @@ FROM cliente_oic AS cli
 LEFT JOIN 
 		(
 	 		SELECT 
+			 	x.CLIENTE as CLIENTE, 
 			 	x.U_Agrupacion AS agr,
 			 	x.CLASIFICACION_3_DES AS MARCA,
 			 	(SUM(x.VTAS) / NULLIF(COUNT( DISTINCT( MONTH(x.FECHA) ) ), 0)  ) AS promvtas
-			FROM base_oic2 AS x
+			FROM 
+				base_oic2 AS x
 			WHERE 
-	         x.FECHA >= date_sub(NOW(), interval 6 month)
-	         AND
-            (x.VTAS > 0 OR x.VTAS < 0)
+            	(x.FECHA BETWEEN (last_day(curdate() - INTERVAL 7 month) + interval 1 DAY) AND last_day(curdate() - INTERVAL 1 month))
+	         	AND
+            	(x.VTAS > 0 OR x.VTAS < 0)
          GROUP BY 
-	         x.U_Agrupacion, x.CLASIFICACION_3_DES
+	         x.CLIENTE, x.U_Agrupacion, x.CLASIFICACION_3_DES
 			) AS base
-	ON ( cli.RAZON_SOCIAL = base.agr )
+	ON ( cli.CLIENTE = base.CLIENTE )
 LEFT JOIN 
 		(
-	 		SELECT 
+	 		SELECT
+			 	x.CLIENTE as CLIENTE, 
 			 	x.U_Agrupacion AS agr,
+				x.CLASIFICACION_3_DES AS MARCA,
 			 	SUM(x.VTAS) AS sumvtas
 			FROM base_oic2 AS x
 			WHERE 
-				YEAR(x.FECHA) = YEAR(NOW()) 
-				AND 
-				MONTH(x.FECHA) = MONTH(NOW())
+				(YEAR(FECHA) = YEAR(NOW()) AND MONTH(FECHA) = MONTH(NOW()))
 				AND
-            (x.VTAS > 0 OR x.VTAS < 0)
-         GROUP BY 
-	         x.U_Agrupacion, x.CLASIFICACION_3_DES
+            	(x.VTAS > 0 OR x.VTAS < 0)
+         	GROUP BY 
+	        	x.CLIENTE, x.U_Agrupacion, x.CLASIFICACION_3_DES
 			) AS base2
-	ON ( cli.RAZON_SOCIAL = base2.agr )
+	ON ( cli.CLIENTE = base2.CLIENTE AND base.MARCA = base2.MARCA )
 	
 	LEFT JOIN (
 		SELECT 
@@ -53,7 +55,5 @@ LEFT JOIN
 	ON ( cli.CODIGO_VENDEDOR = vendedor.COD )
 	WHERE 
 		base.agr IS NOT NULL
-		AND
-		base2.sumvtas IS NOT NULL
 	ORDER BY cli.CLIENTE
 	;
