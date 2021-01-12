@@ -203,7 +203,7 @@ module.exports = {
     },
     async get_sellers (req, res, next) {
         try {
-            let query = `SELECT NOMBRE AS Seller FROM OIC_VENDEDOR`
+            let query = `SELECT NOMBRE AS Seller FROM oic_vendedor`
             const result = await pool.query(query)
             res.json(result)
         } catch (error) {
