@@ -128,30 +128,65 @@ module.exports = {
             res.send("ERROR")
         }
     },
-    async get_report_4 (req, res, next) {
-         /* 
-        Example JSON:
-            {
-            "SellerName": "JOSUE HIDALGO SOTO",
-            "Brand" : "3M",
-            "Class": "BASICO"
-            }
-        
-        */
-       try {
-            const { SellerName, Brand, Class } = req.body;
-            let query = `select * from report_4 WHERE MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date) = YEAR(NOW())`
+
+    async get_report_4_top20_clients (req, res, next) {
+
+        try {
+            const { SellerActive, SellerName } = req.body;
+            let query = `SELECT distinct rpt4_client_code, rpt4_group FROM report_4 WHERE MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date) = YEAR(NOW())`
+            /*if( SellerActive != undefined){
+                query += ` AND rpt4_seller_active = "` + SellerActive + `"`;
+            }*/
             if( SellerName != undefined){
                 query += ` AND rpt4_seller RLIKE "` + SellerName + `"`;
             }
-            if( Brand != undefined){
-                query += ` AND rpt4_brand RLIKE "` + Brand + `"`;
-            }
-            if( Class != undefined){
-                query += ` AND rpt4_class RLIKE "` + Class + `"`;
-            }
+            query += `order by rpt4_client_code asc limit 20`;
+
             const result = await pool.query(query)
             res.json(result)
+        } catch (error) {
+            console.error(error)
+            res.send("ERROR")
+        }
+    },
+
+    async get_report_4 (req, res, next) {
+        /* 
+        Example JSON:
+            {
+            "SellerName": "CARLOS MORA CORRELLA",
+            "SellerActive": "S"
+            }
+        
+        */  
+       try {
+            const { SellerActive, SellerName, Clients } = req.body;
+            let inClients='';
+            if(Clients.length !== 0){
+                Clients.forEach(element => {  inClients += `'${element.rpt4_client_code}',` })
+                inClients = inClients.slice(0, -1);
+                let query = `SELECT rpt4_client_code, REPLACE(rpt4_group, '"','') as rpt4_group,  rpt4_article, REPLACE(rpt4_description, '"','') as rpt4_description, rpt4_avg_sales, rpt4_avg_sales_units,rpt4_month_sales_units, rpt4_seller_code, rpt4_seller, rpt4_class, rpt4_brand, rpt4_date, 
+                (select sum(CAST(rpt4_avg_sales AS DECIMAL(10,2))) from copyoic.report_4 where rpt4_client_code = a.rpt4_client_code) as sum_avg_sales, 
+                (select sum(CAST(rpt4_avg_sales_units AS DECIMAL(10,2))) from copyoic.report_4 where rpt4_client_code = a.rpt4_client_code) as sum_avg_sales_units,
+                (select sum(CAST(rpt4_month_sales_units AS DECIMAL(10,2))) from copyoic.report_4 where rpt4_client_code = a.rpt4_client_code and rpt4_month_sales_units != null ) as sum_month_sales_units,
+                (select count(rpt4_avg_sales) from copyoic.report_4 where rpt4_client_code = a.rpt4_client_code) as count_avg_sales 
+                FROM copyoic.report_4 as a WHERE MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date) = YEAR(NOW())`
+
+                /*if( SellerActive != undefined){
+                    query += ` AND rpt3_seller_active = "` + SellerActive + `"`;
+                }*/
+                if( SellerName != undefined){
+                    query += ` AND rpt4_seller RLIKE "` + SellerName + `"`;
+                }
+                query += ` AND rpt4_client_code IN (${inClients}) order by rpt4_group asc`;
+
+                const result = await pool.query(query)
+    
+                res.json(result)
+            }else{
+                res.json([])
+            }
+           
         } catch (error) {
             console.error(error)
             res.send("ERROR")
