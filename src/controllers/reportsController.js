@@ -77,7 +77,7 @@ module.exports = {
             if( SellerName != undefined){
                 query += ` AND rpt3_seller RLIKE "` + SellerName + `"`;
             }
-            query += `order by rpt3_client_code asc limit 20`;
+            query += `order by rpt3_group asc limit 20`;
 
             const result = await pool.query(query)
             res.json(result)
@@ -115,7 +115,7 @@ module.exports = {
                 if( SellerName != undefined){
                     query += ` AND rpt3_seller RLIKE "` + SellerName + `"`;
                 }
-                query += `AND rpt3_client_code IN (${inClients}) order by rpt3_client_code asc`;
+                query += `AND rpt3_client_code IN (${inClients}) order by rpt3_group asc`;
                 const result = await pool.query(query)
     
                 res.json(result)
