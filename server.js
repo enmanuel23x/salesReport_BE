@@ -6,6 +6,7 @@ const http = require('http')
 //Project's require
 const userRouter = require('./src/routes/userRouter')
 const reportsRouter = require('./src/routes/reportsRouter')
+const hblRouter = require('./src/routes/hblRouter')
 //Initialization
 const version = '/api/v1';
 const PORT = process.env.PORT || 2001
@@ -17,6 +18,7 @@ app.use(cors())
 //Routes
 app.use(version, userRouter)
 app.use(version, reportsRouter)
+app.use(version, hblRouter)
 
 
 //Server

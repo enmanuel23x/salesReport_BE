@@ -8,13 +8,15 @@ SELECT
 	ROUND(base2.sumvtasu,2) AS 'VTAS MES ACTUAL UNID',
  	vendedor.COD AS 'Codigo Vendedor',
  	vendedor.NOMBRE AS 'Vendedor',
-	base.MARCA AS 'Marca',
-	base.CLAS AS 'Clasificacion'
+ 	base.CLAS AS 'Clasificacion',
+	base.MARCA AS 'Marca'
+	
 				
 FROM cliente_oic AS cli 
 LEFT JOIN 
 		(
-	 		SELECT 
+	 		SELECT
+			 	x.CLIENTE as CLIENTE, 
 			 	x.U_Agrupacion AS agr,
 			 	x.ARTICULO AS ARTICULO,
 			 	x.DESCRIPCION AS DESCRIPCION,
@@ -23,30 +25,30 @@ LEFT JOIN
 			 	(SUM(x.VTAS) / NULLIF(COUNT( DISTINCT( MONTH(x.FECHA) ) ), 0)  ) AS promvtas,
 			 	(SUM(x.CANTIDAD) / NULLIF(COUNT( DISTINCT( MONTH(x.FECHA) ) ), 0)  ) AS promvtasu
 			FROM base_oic2 AS x
-			WHERE 
-	         x.FECHA >= date_sub(NOW(), interval 6 month)
-	         AND
-            (x.VTAS > 0 OR x.VTAS < 0)
+			WHERE
+                (x.FECHA BETWEEN (last_day(curdate() - INTERVAL 7 month) + interval 1 DAY) AND last_day(curdate() - INTERVAL 1 month))
+	            AND
+                (x.VTAS > 0 OR x.VTAS < 0)
          GROUP BY 
-	         x.U_Agrupacion, x.ARTICULO, x.DESCRIPCION, x.CLASIFICACION_5_DES, x.CLASIFICACION_3_DES
+	        	x.CLIENTE, x.U_Agrupacion, x.ARTICULO, x.DESCRIPCION, x.CLASIFICACION_5_DES, x.CLASIFICACION_3_DES
 			) AS base
-		ON ( cli.RAZON_SOCIAL = base.agr )
+		ON ( cli.CLIENTE = base.CLIENTE )
 	LEFT JOIN 
 		(
-	 		SELECT 
+	 		SELECT
+			 	x.CLIENTE as CLIENTE, 
 			 	x.U_Agrupacion AS agr,
-			 	SUM(x.CANTIDAD) AS sumvtasu
+			 	SUM(x.CANTIDAD) AS sumvtasu,
+				x.ARTICULO AS ARTICULO
 			FROM base_oic2 AS x
-			WHERE 
-				YEAR(x.FECHA) = YEAR(NOW()) 
-				AND 
-				MONTH(x.FECHA) = MONTH(NOW())
+			WHERE
+				(YEAR(FECHA) = YEAR(NOW()) AND MONTH(FECHA) = MONTH(NOW()))
 				AND
-            (x.VTAS > 0 OR x.VTAS < 0)
+                (x.VTAS > 0 OR x.VTAS < 0)
          GROUP BY 
-	         x.U_Agrupacion, x.ARTICULO
+	         	x.CLIENTE, x.U_Agrupacion, x.ARTICULO
 			) AS base2
-	ON ( cli.RAZON_SOCIAL = base2.agr )
+	ON ( cli.CLIENTE = base2.CLIENTE AND base.ARTICULO = base2.ARTICULO)
 	LEFT JOIN (
 		SELECT 
 			VENDEDOR AS COD,
