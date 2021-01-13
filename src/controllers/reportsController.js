@@ -165,12 +165,16 @@ module.exports = {
             if(Clients.length !== 0){
                 Clients.forEach(element => {  inClients += `'${element.rpt4_client_code}',` })
                 inClients = inClients.slice(0, -1);
-                let query = `SELECT rpt4_client_code, REPLACE(rpt4_group, '"','') as rpt4_group,  rpt4_article, REPLACE(rpt4_description, '"','') as rpt4_description, rpt4_avg_sales, rpt4_avg_sales_units,rpt4_month_sales_units, rpt4_seller_code, rpt4_seller, rpt4_class, rpt4_brand, rpt4_date, 
+                let query = `SELECT rpt4_client_code, REPLACE(rpt4_group, '"','') as rpt4_group,  rpt4_article, REPLACE(rpt4_description, '"','') as rpt4_description, rpt4_avg_sales, rpt4_avg_sales_units,rpt4_month_sales_units, rpt4_seller_code, rpt4_seller, rpt4_class, rpt4_brand, rpt4_date,
                 (select sum(CAST(rpt4_avg_sales AS DECIMAL(10,2))) from copyoic.report_4 where rpt4_client_code = a.rpt4_client_code) as sum_avg_sales, 
-                (select sum(CAST(rpt4_avg_sales_units AS DECIMAL(10,2))) from copyoic.report_4 where rpt4_client_code = a.rpt4_client_code) as sum_avg_sales_units,
-                (select sum(CAST(rpt4_month_sales_units AS DECIMAL(10,2))) from copyoic.report_4 where rpt4_client_code = a.rpt4_client_code and rpt4_month_sales_units != null ) as sum_month_sales_units,
-                (select count(rpt4_avg_sales) from copyoic.report_4 where rpt4_client_code = a.rpt4_client_code) as count_avg_sales 
-                FROM copyoic.report_4 as a WHERE MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date) = YEAR(NOW())`
+                round((select sum(rpt4_avg_sales_units) from copyoic.report_4 where rpt4_client_code = a.rpt4_client_code)) as sum_avg_sales_units,
+                round((select sum(rpt4_month_sales_units) from copyoic.report_4 where rpt4_client_code = a.rpt4_client_code)) as sum_month_sales_units,
+                #(select sum(convert(rpt4_month_sales_units, signed integer)) from copyoic.report_4 where rpt4_client_code = a.rpt4_client_code and rpt4_month_sales_units != null ) as sum_month_sales_units,
+                (select count(rpt4_avg_sales) from copyoic.report_4 where rpt4_client_code = a.rpt4_client_code) as count_avg_sales,
+				(select sum(CAST(rpt4_avg_sales AS DECIMAL(10,2))) from copyoic.report_4 ) as grandtotal_avg_sales, 
+                round((select sum(rpt4_avg_sales_units) from copyoic.report_4)) as grandtotal_avg_sales_units,
+                round((select sum(rpt4_month_sales_units) from copyoic.report_4)) as grandtotal_month_sales_units
+FROM copyoic.report_4 as a WHERE MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date) = YEAR(NOW())`
 
                 /*if( SellerActive != undefined){
                     query += ` AND rpt3_seller_active = "` + SellerActive + `"`;
