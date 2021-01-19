@@ -3,7 +3,6 @@ const pool = require('../../database/conn/database');
 module.exports = {
 
     async get_report_1 (req, res, next) {
-
         /* 
         Example JSON:
             {
@@ -12,9 +11,12 @@ module.exports = {
             "SellerActive": "S"
             }
         
-        */
+        */       
         try {
-            const { ABC, SellerActive, SellerName } = req.body;
+            
+            const { ABC, SellerActive, SellerName, Rol, SellerCode,Id } = req.body;
+            let data='';
+
             let query = `SELECT * FROM report_1 WHERE MONTH(rpt1_date) = MONTH(NOW()) AND YEAR(rpt1_date) = YEAR(NOW())`
             if( ABC != undefined){
                 query += ` AND rpt1_abc RLIKE "` + ABC + `"`;
@@ -24,6 +26,19 @@ module.exports = {
             }
             if( SellerName != undefined){
                 query += ` AND rpt1_seller RLIKE "` + SellerName + `"`;
+            }
+            
+            if (Rol == '3'){              //rol de vendedor
+                query += ` AND rpt1_seller_code = "` + SellerCode + `"`;
+            }
+            if (Rol == '2'){              //rol de supervisor
+                const vendors = await pool.query(`SELECT usr_seller_code FROM copyoic.users where usr_id_supervisor = '${Id}'`)
+                data += `(`
+                vendors.forEach(element => { data += `'${element.usr_seller_code}',` })
+                data = data.slice(0, -1);
+                data += `)`
+                
+                query += ` AND rpt1_seller_code in ` + data + ``;
             }
             const result = await pool.query(query)
             
@@ -215,6 +230,7 @@ FROM copyoic.report_4 as a WHERE MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_d
             res.send("ERROR")
         }
     },
+   
     async get_report_4_brand (req, res, next) {
         try {
             let query = `SELECT DISTINCT rpt4_brand from report_4 WHERE MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date) = YEAR(NOW())`
