@@ -23,8 +23,7 @@ module.exports = {
             }
             if( SellerActive != undefined){
                 query += ` AND rpt1_seller_active = "` + SellerActive + `"`;
-            }
-            
+            }            
             if (Rol == '3'){              //rol de vendedor
                 query += ` AND rpt1_seller_code = "` + SellerCode + `"`;
             }
@@ -33,17 +32,19 @@ module.exports = {
                     query += ` AND rpt1_seller RLIKE "` + SellerName + `"`;
                 }else{
                     const vendors = await pool.query(`SELECT usr_code_seller FROM copyoic.users where usr_id_supervisor = '${UsrId}'`)
-                    data += `(`
-                    vendors.forEach(element => { data += `'${element.usr_code_seller}',` })
-                    data = data.slice(0, -1);
-                    data += `)`                
-                    query += ` AND rpt1_seller_code in ` + data + ``;
-                }
-                
+                    if(vendors.length !== 0){
+                        data += `(`
+                        vendors.forEach(element => { data += `'${element.usr_code_seller}',` })
+                        data = data.slice(0, -1);
+                        data += `)`                
+                        query += ` AND rpt1_seller_code in ` + data + ``;                        
+                    }else{
+                        res.json([])
+                    } 
+                }                
             }
-            const result = await pool.query(query)
-            
-            res.json(result)
+            const result = await pool.query(query)            
+            res.json(result)            
         } catch (error) {
             console.error(error)
             res.send("ERROR")
@@ -61,7 +62,8 @@ module.exports = {
         
         */
         try {
-            const { SellerActive, SellerName, Month, Year } = req.body;
+            const { SellerActive, SellerName, Month, Year, Rol, SellerCode,UsrId } = req.body;
+            let data='';
             let query = `select * from report_2`
             if(Month && Year){
                 query += ` WHERE MONTH(rpt2_date) = "${Month}" AND YEAR(rpt2_date) = "${Year}"`
@@ -71,11 +73,29 @@ module.exports = {
             if( SellerActive != undefined){
                 query += ` AND rpt2_seller_active = "` + SellerActive + `"`;
             }
-            if( SellerName != undefined){
-                query += ` AND rpt2_seller RLIKE "` + SellerName + `"`;
+            if (Rol == '3'){              //rol de vendedor
+                query += ` AND rpt2_seller_code = "` + SellerCode + `"`;
+            }
+            if (Rol == '2'){              //rol de supervisor
+                
+                if( SellerName != undefined){
+                    query += ` AND rpt2_seller RLIKE "` + SellerName + `"`;
+                }else{
+                    const vendors = await pool.query(`SELECT usr_code_seller FROM copyoic.users where usr_id_supervisor = '${UsrId}'`)
+                    
+                    if(vendors.length !== 0){
+                        data += `(`
+                        vendors.forEach(element => { data += `'${element.usr_code_seller}',` })
+                        data = data.slice(0, -1);
+                        data += `)`                
+                        query += ` AND rpt2_seller_code in ` + data + ``;
+                    }else{
+                        res.json([])
+                    }     
+                }                
             }
             const result = await pool.query(query)
-            res.json(result)
+            res.json(result)            
         } catch (error) {
             console.error(error)
             res.send("ERROR")
