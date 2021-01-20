@@ -210,19 +210,42 @@ module.exports = {
 
     async get_report_4_top20_clients (req, res, next) {
 
-        try {
-            const { SellerActive, SellerName } = req.body;
+        try { 
+            const { Class, Brand, SellerName, Rol, SellerCode,UsrId  } = req.body;
             let data='';
             let query = `SELECT distinct rpt4_client_code, rpt4_group FROM report_4 WHERE MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date) = YEAR(NOW())`
-            /*if( SellerActive != undefined){
-                query += ` AND rpt4_seller_active = "` + SellerActive + `"`;
-            }*/
-            if( SellerName != undefined){
-                query += ` AND rpt4_seller RLIKE "` + SellerName + `"`;
+            if( Class != undefined){
+                query += ` AND rpt4_class = "` + Class + `"`;
+            }
+            if( Brand != undefined){
+                query += ` AND rpt4_brand = "` + Brand + `"`;
+            }
+            
+            if (Rol == '3'){              //rol de vendedor
+                query += ` AND rpt4_seller_code = "` + SellerCode + `"`;
+            }
+            if (Rol == '2'){              //rol de supervisor
+                
+                if( SellerName != undefined){
+                    query += ` AND rpt4_seller RLIKE "` + SellerName + `"`;
+                }else{
+                    const vendors = await pool.query(`SELECT usr_code_seller FROM copyoic.users where usr_id_supervisor = '${UsrId}'`)
+                    
+                    if(vendors.length !== 0){
+                        data += `(`
+                        vendors.forEach(element => { data += `'${element.usr_code_seller}',` })
+                        data = data.slice(0, -1);
+                        data += `)`                
+                        query += ` AND rpt4_seller_code in ` + data + ``;
+                    }else{
+                        res.json([])
+                    }     
+                }                
             }
             query += `order by rpt4_client_code asc limit 20`;
-
+            
             const result = await pool.query(query)
+            
             res.json(result)
         } catch (error) {
             console.error(error)
@@ -240,33 +263,61 @@ module.exports = {
         
         */  
        try {
-            const { SellerActive, SellerName, Clients } = req.body;
+            const { Class, Brand, SellerName, Rol, SellerCode,UsrId, Clients } = req.body;
+
             let inClients='';
             let data='';
+            let terms ='';
+            if( Class != undefined){
+                terms += ` AND rpt4_class = "` + Class + `"`;
+            }
+            if( Brand != undefined){
+                terms += ` AND rpt4_brand = "` + Brand + `"`;
+            }
+            if (Rol == '3'){              //rol de vendedor
+                terms += ` AND rpt4_seller_code = "` + SellerCode + `"`;
+            }
+            if (Rol == '2'){              //rol de supervisor
+                    
+                if( SellerName != undefined){
+                    terms += ` AND rpt4_seller RLIKE "` + SellerName + `"`;
+                }else{
+                    const vendors = await pool.query(`SELECT usr_code_seller FROM copyoic.users where usr_id_supervisor = '${UsrId}'`)                    
+                    if(vendors.length !== 0){
+                        data += `(`
+                        vendors.forEach(element => { 
+                            if(element.usr_code_seller !== null && element.usr_code_seller !== '' && element.usr_code_seller !== undefined){
+                                data += `'${element.usr_code_seller}',`
+                            }
+                             
+                        })
+                        data = data.slice(0, -1);
+                        data += `)`                
+                        terms += ` AND rpt4_seller_code in ` + data + ``;
+                    }else{
+                        res.json([])
+                    }     
+                }                
+            }
+
+            
             if(Clients.length !== 0){
                 Clients.forEach(element => {  inClients += `'${element.rpt4_client_code}',` })
                 inClients = inClients.slice(0, -1);
+                terms += ` AND rpt4_client_code IN (${inClients})`;
+
                 let query = `SELECT rpt4_client_code, REPLACE(rpt4_group, '"','') as rpt4_group,  rpt4_article, REPLACE(rpt4_description, '"','') as rpt4_description, rpt4_avg_sales, rpt4_avg_sales_units,rpt4_month_sales_units, rpt4_seller_code, rpt4_seller, rpt4_class, rpt4_brand, rpt4_date,
-                (select sum(CAST(rpt4_avg_sales AS DECIMAL(10,2))) from copyoic.report_4 where rpt4_client_code = a.rpt4_client_code) as sum_avg_sales, 
-                round((select sum(rpt4_avg_sales_units) from copyoic.report_4 where rpt4_client_code = a.rpt4_client_code)) as sum_avg_sales_units,
-                round((select sum(rpt4_month_sales_units) from copyoic.report_4 where rpt4_client_code = a.rpt4_client_code)) as sum_month_sales_units,
-                #(select sum(convert(rpt4_month_sales_units, signed integer)) from copyoic.report_4 where rpt4_client_code = a.rpt4_client_code and rpt4_month_sales_units != null ) as sum_month_sales_units,
-                (select count(rpt4_avg_sales) from copyoic.report_4 where rpt4_client_code = a.rpt4_client_code) as count_avg_sales,
-				(select sum(CAST(rpt4_avg_sales AS DECIMAL(10,2))) from copyoic.report_4 ) as grandtotal_avg_sales, 
-                round((select sum(rpt4_avg_sales_units) from copyoic.report_4)) as grandtotal_avg_sales_units,
-                round((select sum(rpt4_month_sales_units) from copyoic.report_4)) as grandtotal_month_sales_units
-FROM copyoic.report_4 as a WHERE MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date) = YEAR(NOW())`
-
-                /*if( SellerActive != undefined){
-                    query += ` AND rpt3_seller_active = "` + SellerActive + `"`;
-                }*/
-                if( SellerName != undefined){
-                    query += ` AND rpt4_seller RLIKE "` + SellerName + `"`;
-                }
-                query += ` AND rpt4_client_code IN (${inClients}) order by rpt4_group asc`;
-
+                (select sum(CAST(rpt4_avg_sales AS DECIMAL(10,2))) from copyoic.report_4 where rpt4_client_code = a.rpt4_client_code and MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date) ${terms}  ) as sum_avg_sales, 
+                round((select sum(rpt4_avg_sales_units) from copyoic.report_4 where rpt4_client_code = a.rpt4_client_code  and MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date) ${terms})) as sum_avg_sales_units,
+                round((select sum(rpt4_month_sales_units) from copyoic.report_4 where rpt4_client_code = a.rpt4_client_code  and MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date) ${terms})) as sum_month_sales_units,
+                (select count(rpt4_avg_sales) from copyoic.report_4 where rpt4_client_code = a.rpt4_client_code  and MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date) ${terms}) as count_avg_sales,
+				(select sum(CAST(rpt4_avg_sales AS DECIMAL(10,2))) from copyoic.report_4 where MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date) ${terms}) as grandtotal_avg_sales, 
+                round((select sum(rpt4_avg_sales_units) from copyoic.report_4 where MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date) ${terms} )) as grandtotal_avg_sales_units,
+                round((select sum(rpt4_month_sales_units) from copyoic.report_4 where MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date) ${terms})) as grandtotal_month_sales_units
+                FROM copyoic.report_4 as a WHERE MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date) = YEAR(NOW()) ${terms}`
+                query += ` order by rpt4_group asc`;
+                
                 const result = await pool.query(query)
-    
                 res.json(result)
             }else{
                 res.json([])
