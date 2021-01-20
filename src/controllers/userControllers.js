@@ -24,6 +24,28 @@ module.exports = {
             res.send("ERROR")
         }
     },
+    async getAllUserFilterCollaborator (req, res, next) {
+        try {
+            const result = await pool.query('SELECT * FROM users where usr_rol != "4"')
+            res.json(result.map( el => {
+                return {
+                    usrId: el.usr_id,
+                    usrName: el.usr_name,
+                    usrLastName: el.usr_last_name,
+                    usrEmail: el.usr_email,
+                    usrRol: el.usr_rol,
+                    usrStatus: el.usr_status,
+                    cliId: el.cli_id,
+                    cliName: el.cli_name,
+                    usrSellerCode:el.usr_seller_code,
+                    usrIdSupervisor:el.usr_id_supervisor
+                }
+            }))
+        } catch (error) {
+            console.error(error)
+            res.send("ERROR")
+        }
+    },
 
     async getUsersById(req, res, next) {
         try {
@@ -48,9 +70,10 @@ module.exports = {
     },
     async getUsersByIdSupervisor(req, res, next) {
         try {
-            //console.log('result: ',req.params)
+            
             const usr_idSupervisor = req.params.idsupervisor;
-            const result = await pool.query('SELECT * FROM users WHERE usr_id_supervisor = ' + usr_idSupervisor);
+
+            const result = await pool.query(`SELECT * FROM users WHERE usr_id_supervisor = '${usr_idSupervisor}'`);
             res.json(result.map( el => {
                 return {
                     usrId: el.usr_id,

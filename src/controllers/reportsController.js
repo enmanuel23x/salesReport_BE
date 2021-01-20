@@ -14,7 +14,7 @@ module.exports = {
         */       
         try {
             
-            const { ABC, SellerActive, SellerName, Rol, SellerCode,Id } = req.body;
+            const { ABC, SellerActive, SellerName, Rol, SellerCode,UsrId } = req.body;
             let data='';
 
             let query = `SELECT * FROM report_1 WHERE MONTH(rpt1_date) = MONTH(NOW()) AND YEAR(rpt1_date) = YEAR(NOW())`
@@ -24,21 +24,22 @@ module.exports = {
             if( SellerActive != undefined){
                 query += ` AND rpt1_seller_active = "` + SellerActive + `"`;
             }
-            if( SellerName != undefined){
-                query += ` AND rpt1_seller RLIKE "` + SellerName + `"`;
-            }
             
             if (Rol == '3'){              //rol de vendedor
                 query += ` AND rpt1_seller_code = "` + SellerCode + `"`;
             }
             if (Rol == '2'){              //rol de supervisor
-                const vendors = await pool.query(`SELECT usr_seller_code FROM copyoic.users where usr_id_supervisor = '${Id}'`)
-                data += `(`
-                vendors.forEach(element => { data += `'${element.usr_seller_code}',` })
-                data = data.slice(0, -1);
-                data += `)`
+                if( SellerName != undefined){
+                    query += ` AND rpt1_seller RLIKE "` + SellerName + `"`;
+                }else{
+                    const vendors = await pool.query(`SELECT usr_code_seller FROM copyoic.users where usr_id_supervisor = '${UsrId}'`)
+                    data += `(`
+                    vendors.forEach(element => { data += `'${element.usr_code_seller}',` })
+                    data = data.slice(0, -1);
+                    data += `)`                
+                    query += ` AND rpt1_seller_code in ` + data + ``;
+                }
                 
-                query += ` AND rpt1_seller_code in ` + data + ``;
             }
             const result = await pool.query(query)
             
