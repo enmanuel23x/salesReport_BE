@@ -105,13 +105,35 @@ module.exports = {
     async get_report_3_top20_clients (req, res, next) {
 
         try {
-            const { SellerActive, SellerName } = req.body;
+            const { SellerActive, SellerName,Rol, SellerCode,UsrId } = req.body;
+            let data='';
             let query = `SELECT distinct rpt3_client_code, rpt3_group FROM report_3 WHERE MONTH(rpt3_date) = MONTH(NOW()) AND YEAR(rpt3_date) = YEAR(NOW())`
             if( SellerActive != undefined){
                 query += ` AND rpt3_seller_active = "` + SellerActive + `"`;
             }
             if( SellerName != undefined){
                 query += ` AND rpt3_seller RLIKE "` + SellerName + `"`;
+            }
+            if (Rol == '3'){              //rol de vendedor
+                query += ` AND rpt3_seller_code = "` + SellerCode + `"`;
+            }
+            if (Rol == '2'){              //rol de supervisor
+                
+                if( SellerName != undefined){
+                    query += ` AND rpt3_seller RLIKE "` + SellerName + `"`;
+                }else{
+                    const vendors = await pool.query(`SELECT usr_code_seller FROM copyoic.users where usr_id_supervisor = '${UsrId}'`)
+                    
+                    if(vendors.length !== 0){
+                        data += `(`
+                        vendors.forEach(element => { data += `'${element.usr_code_seller}',` })
+                        data = data.slice(0, -1);
+                        data += `)`                
+                        query += ` AND rpt3_seller_code in ` + data + ``;
+                    }else{
+                        res.json([])
+                    }     
+                }                
             }
             query += `order by rpt3_group asc limit 20`;
 
@@ -133,8 +155,9 @@ module.exports = {
         
         */  
        try {
-            const { SellerActive, SellerName, Clients } = req.body;
+            const { SellerActive, SellerName, Clients, Rol, SellerCode,UsrId } = req.body;
             let inClients='';
+            let data='';
             if(Clients.length !== 0){
                 Clients.forEach(element => {  inClients += `'${element.rpt3_client_code}',` })
                 inClients = inClients.slice(0, -1);
@@ -151,9 +174,29 @@ module.exports = {
                 if( SellerName != undefined){
                     query += ` AND rpt3_seller RLIKE "` + SellerName + `"`;
                 }
+                if (Rol == '3'){              //rol de vendedor
+                    query += ` AND rpt3_seller_code = "` + SellerCode + `"`;
+                }
+                if (Rol == '2'){              //rol de supervisor
+                    
+                    if( SellerName != undefined){
+                        query += ` AND rpt3_seller RLIKE "` + SellerName + `"`;
+                    }else{
+                        const vendors = await pool.query(`SELECT usr_code_seller FROM copyoic.users where usr_id_supervisor = '${UsrId}'`)
+                        
+                        if(vendors.length !== 0){
+                            data += `(`
+                            vendors.forEach(element => { data += `'${element.usr_code_seller}',` })
+                            data = data.slice(0, -1);
+                            data += `)`                
+                            query += ` AND rpt3_seller_code in ` + data + ``;
+                        }else{
+                            res.json([])
+                        }     
+                    }                
+                }
                 query += `AND rpt3_client_code IN (${inClients}) order by rpt3_group asc`;
                 const result = await pool.query(query)
-    
                 res.json(result)
             }else{
                 res.json([])
@@ -169,6 +212,7 @@ module.exports = {
 
         try {
             const { SellerActive, SellerName } = req.body;
+            let data='';
             let query = `SELECT distinct rpt4_client_code, rpt4_group FROM report_4 WHERE MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date) = YEAR(NOW())`
             /*if( SellerActive != undefined){
                 query += ` AND rpt4_seller_active = "` + SellerActive + `"`;
@@ -198,6 +242,7 @@ module.exports = {
        try {
             const { SellerActive, SellerName, Clients } = req.body;
             let inClients='';
+            let data='';
             if(Clients.length !== 0){
                 Clients.forEach(element => {  inClients += `'${element.rpt4_client_code}',` })
                 inClients = inClients.slice(0, -1);
@@ -234,6 +279,7 @@ FROM copyoic.report_4 as a WHERE MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_d
     },
     async get_report_5 (req, res, next) {
         try {
+            let data='';
             const result = {}
             res.json(result)
         } catch (error) {
