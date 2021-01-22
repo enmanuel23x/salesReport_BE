@@ -8,11 +8,11 @@ SELECT
 				
 FROM 
 	cliente_oic AS cli 
+
 LEFT JOIN 
 		(
 	 	SELECT
-		 	x.CLIENTE AS CLIENTE,
-	        x.U_Agrupacion AS agr, 
+	        x.NOMBRE AS agr, 
 	        (SUM(x.VTAS) / NULLIF(COUNT( DISTINCT( MONTH(x.FECHA) ) ), 0)  ) AS promvtas,
 	        (SELECT SUM(y.VTAS) 
                 FROM 
@@ -20,9 +20,9 @@ LEFT JOIN
                 WHERE
 					y.Fecha Between DATEADD(m, DATEDIFF(m, 0, DATEADD(m, -1, GETDATE())), 0) and DATEADD(m, DATEDIFF(m, 0, GETDATE()), 0)
          	        AND
-			        y.U_Agrupacion = x.U_Agrupacion
+			        y.NOMBRE = x.NOMBRE
       	        GROUP BY 
-			        y.U_Agrupacion) AS lastmonth,
+			        y.NOMBRE) AS lastmonth,
             (SELECT SUM(z.VTAS) / NULLIF((SUM(x.VTAS) / NULLIF(COUNT( DISTINCT( MONTH(x.FECHA) ) ), 0)  ),0) 
                 FROM 
                     BASE_OIC2 AS z
@@ -30,9 +30,9 @@ LEFT JOIN
 
                     z.Fecha Between DATEADD(m, DATEDIFF(m, 0, DATEADD(m, -1, GETDATE())), 0) and DATEADD(m, DATEDIFF(m, 0, GETDATE()), 0)
 			        AND
-                    z.U_Agrupacion = x.U_Agrupacion
+                    z.NOMBRE = x.NOMBRE
 		        GROUP BY 
-         	        z.U_Agrupacion) AS alc
+         	        z.NOMBRE) AS alc
             FROM 
 	            BASE_OIC2 AS x
             WHERE
@@ -40,8 +40,8 @@ LEFT JOIN
 	            AND
                 (x.VTAS > 0 OR x.VTAS < 0)
             GROUP BY 
-                x.U_Agrupacion, x.CLIENTE ) AS base
-    ON ( cli.CLIENTE = base.CLIENTE )
+                x.NOMBRE ) AS base
+    ON ( cli.RAZON_SOCIAL = base.agr )
 LEFT JOIN (
 	SELECT 
 		VENDEDOR AS COD,
@@ -54,5 +54,5 @@ WHERE
 	base.agr IS NOT NULL
 	AND
 	base.lastmonth IS NOT NULL
-ORDER BY cli.CLIENTE
+ORDER BY cli.RAZON_SOCIAL
 ;

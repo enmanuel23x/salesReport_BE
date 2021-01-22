@@ -16,7 +16,7 @@ LEFT JOIN
 		(
 	 		SELECT
 			 	x.CLIENTE as CLIENTE, 
-			 	x.U_Agrupacion AS agr,
+			 	x.NOMBRE AS agr,
 			 	x.ARTICULO AS ARTICULO,
 			 	x.DESCRIPCION AS DESCRIPCION,
 				x.CLASIFICACION_5_DES AS CLAS,
@@ -29,14 +29,14 @@ LEFT JOIN
 	            AND
                 (x.VTAS > 0 OR x.VTAS < 0)
          GROUP BY 
-	        	x.CLIENTE, x.U_Agrupacion, x.ARTICULO, x.DESCRIPCION, x.CLASIFICACION_5_DES, x.CLASIFICACION_3_DES
+	        	x.CLIENTE, x.NOMBRE, x.ARTICULO, x.DESCRIPCION, x.CLASIFICACION_5_DES, x.CLASIFICACION_3_DES
 			) AS base
 		ON ( cli.CLIENTE = base.CLIENTE )
 	LEFT JOIN 
 		(
 	 		SELECT
 			 	x.CLIENTE as CLIENTE, 
-			 	x.U_Agrupacion AS agr,
+			 	x.NOMBRE AS agr,
 			 	SUM(x.CANTIDAD) AS sumvtasu,
 				x.ARTICULO AS ARTICULO
 			FROM base_oic2 AS x
@@ -45,7 +45,7 @@ LEFT JOIN
 				AND
                 (x.VTAS > 0 OR x.VTAS < 0)
          GROUP BY 
-	         	x.CLIENTE, x.U_Agrupacion, x.ARTICULO
+	         	x.CLIENTE, x.NOMBRE, x.ARTICULO
 			) AS base2
 	ON ( cli.CLIENTE = base2.CLIENTE AND base.ARTICULO = base2.ARTICULO)
 	LEFT JOIN (

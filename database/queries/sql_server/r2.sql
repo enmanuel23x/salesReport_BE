@@ -12,7 +12,7 @@ LEFT JOIN
 		(
 	 		SELECT 
 			 	x.CLIENTE as CLIENTE,
-			 	x.U_Agrupacion AS agr, 
+			 	x.NOMBRE AS agr, 
       		(
 					(SUM(x.VTAS) / NULLIF(COUNT( DISTINCT( MONTH(x.FECHA) ) ), 0)  )
 					*1
@@ -27,13 +27,13 @@ LEFT JOIN
 	            AND
                 (x.VTAS > 0 OR x.VTAS < 0)
             GROUP BY 
-	            x.U_Agrupacion, x.CLIENTE
+	            x.NOMBRE, x.CLIENTE
 			) AS base
 	ON  ( cli.CLIENTE = base.CLIENTE )
 	
 	LEFT JOIN (
 		SELECT 
-			 	x.U_Agrupacion AS agr,
+			 	x.NOMBRE AS agr,
 				SUM(x.VTAS)  AS sumvtas
 
             FROM 
@@ -43,7 +43,7 @@ LEFT JOIN
 	           	AND
                (x.VTAS > 0 OR x.VTAS < 0)
             GROUP BY 
-	            x.U_Agrupacion
+	            x.NOMBRE
 		) AS semana
 	ON ( cli.RAZON_SOCIAL = semana.agr )
 	
