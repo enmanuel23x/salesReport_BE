@@ -213,57 +213,13 @@ module.exports = {
     async get_report_4_top20_clients (req, res, next) {
 
         try { 
-            const { Class, Brand, SellerName, Rol, SellerCode,UsrId  } = req.body;
-            let data='';
-            let terms ='';
-            if( Class != undefined){
-                terms += ` AND rpt4_class = "` + Class + `"`;
-            }
-            if( Brand != undefined){
-                terms += ` AND rpt4_brand = "` + Brand + `"`;
-            }
-            if (Rol == '3'){              //rol de vendedor
-                terms += ` AND rpt4_seller_code = "` + SellerCode + `"`;
-            }
-            if (Rol == '2'){              //rol de supervisor
-                    
-                if( SellerName != undefined){
-                    //console.log('entro', SellerName)
-                  let seller_code =  SellerName.split('|')
-                  //console.log('seller_code::', seller_code)
-                  data += `(`
-                  seller_code.forEach(element => { 
-                      if(element !== null && element !== '' && element !== undefined){
-                          data += `'${element}',`
-                      }
-                       
-                  })
-                  data = data.slice(0, -1);
-                  data += `)`
-                  terms += ` AND rpt4_seller_code in ` + data + ``;
-                  //console.log('result::', terms)
-                    //terms += ` AND rpt4_seller RLIKE "` + SellerName + `"`;
-                }else{
-                    const vendors = await pool.query(`SELECT usr_code_seller FROM copyoic.users where usr_id_supervisor = '${UsrId}'`)                    
-                    if(vendors.length !== 0){
-                        data += `(`
-                        vendors.forEach(element => { 
-                            if(element.usr_code_seller !== null && element.usr_code_seller !== '' && element.usr_code_seller !== undefined){
-                                data += `'${element.usr_code_seller}',`
-                            }
-                             
-                        })
-                        data = data.slice(0, -1);
-                        data += `)`                
-                        terms += ` AND rpt4_seller_code in ` + data + ``;
-                    }else{
-                        res.json([])
-                    }     
-                }                
-            }
-            let query = `SELECT distinct rpt4_client_code, rpt4_group FROM report_4 WHERE MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date) = YEAR(NOW()) ${terms} order by rpt4_client_code asc limit 20`
+            
+            let query = `SELECT rpt4_client_code, rpt4_group,sum(CONVERT(SUBSTRING_INDEX(rpt4_avg_sales,'-',-1),UNSIGNED INTEGER)) AS num  
+            FROM copyoic.report_4 
+            WHERE MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date) = YEAR(NOW())
+            group by rpt4_client_code asc
+            order by sum(CONVERT(SUBSTRING_INDEX(rpt4_avg_sales,'-',-1),UNSIGNED INTEGER)) desc limit 20`
 
-            //query += `order by rpt4_client_code asc limit 20`;
             
             const result = await pool.query(query)
             
