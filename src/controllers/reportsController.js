@@ -165,7 +165,7 @@ module.exports = {
                 (select sum(CAST(rpt3_avg_sales AS DECIMAL(10,2))) from copyoic.report_3 where rpt3_client_code = a.rpt3_client_code) as sum_avg_sales, 
                 (select sum(CAST(rpt3_month_sales AS DECIMAL(10,2))) from copyoic.report_3 where rpt3_client_code = a.rpt3_client_code) as sum_month_sales,
                 (select sum(CAST(rpt3_scope_perc AS DECIMAL(10,2))) from copyoic.report_3 where rpt3_client_code = a.rpt3_client_code) as sum_scope_perc,
-                FORMAT((select (sum(CAST(rpt3_scope_perc AS DECIMAL(10,2)))/(select count(rpt3_scope_perc) from copyoic.report_3 where rpt3_client_code = a.rpt3_client_code)) as a from copyoic.report_3 where rpt3_client_code = a.rpt3_client_code),2) as prom_scope_perc,
+                (select (sum(CAST(rpt3_scope_perc AS DECIMAL(10,2)))/(select count(rpt3_scope_perc) from copyoic.report_3 where rpt3_client_code = a.rpt3_client_code)) as a from copyoic.report_3 where rpt3_client_code = a.rpt3_client_code) as prom_scope_perc,
                 (select count(rpt3_scope_perc) from copyoic.report_3 where rpt3_client_code = a.rpt3_client_code) as count_scope_perc FROM copyoic.report_3 as a WHERE MONTH(rpt3_date) = MONTH(NOW()) AND YEAR(rpt3_date) = YEAR(NOW())`
                 //let query = `select * from report_3 WHERE MONTH(rpt3_date) = MONTH(NOW()) AND YEAR(rpt3_date) = YEAR(NOW())`
                 if( SellerActive != undefined){
@@ -196,6 +196,8 @@ module.exports = {
                     }                
                 }
                 query += `AND rpt3_client_code IN (${inClients}) order by rpt3_group asc`;
+                
+
                 const result = await pool.query(query)
                 res.json(result)
             }else{
@@ -213,36 +215,55 @@ module.exports = {
         try { 
             const { Class, Brand, SellerName, Rol, SellerCode,UsrId  } = req.body;
             let data='';
-            let query = `SELECT distinct rpt4_client_code, rpt4_group FROM report_4 WHERE MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date) = YEAR(NOW())`
+            let terms ='';
             if( Class != undefined){
-                query += ` AND rpt4_class = "` + Class + `"`;
+                terms += ` AND rpt4_class = "` + Class + `"`;
             }
             if( Brand != undefined){
-                query += ` AND rpt4_brand = "` + Brand + `"`;
+                terms += ` AND rpt4_brand = "` + Brand + `"`;
             }
-            
             if (Rol == '3'){              //rol de vendedor
-                query += ` AND rpt4_seller_code = "` + SellerCode + `"`;
+                terms += ` AND rpt4_seller_code = "` + SellerCode + `"`;
             }
             if (Rol == '2'){              //rol de supervisor
-                
-                if( SellerName != undefined){
-                    query += ` AND rpt4_seller RLIKE "` + SellerName + `"`;
-                }else{
-                    const vendors = await pool.query(`SELECT usr_code_seller FROM copyoic.users where usr_id_supervisor = '${UsrId}'`)
                     
+                if( SellerName != undefined){
+                    //console.log('entro', SellerName)
+                  let seller_code =  SellerName.split('|')
+                  //console.log('seller_code::', seller_code)
+                  data += `(`
+                  seller_code.forEach(element => { 
+                      if(element !== null && element !== '' && element !== undefined){
+                          data += `'${element}',`
+                      }
+                       
+                  })
+                  data = data.slice(0, -1);
+                  data += `)`
+                  terms += ` AND rpt4_seller_code in ` + data + ``;
+                  //console.log('result::', terms)
+                    //terms += ` AND rpt4_seller RLIKE "` + SellerName + `"`;
+                }else{
+                    const vendors = await pool.query(`SELECT usr_code_seller FROM copyoic.users where usr_id_supervisor = '${UsrId}'`)                    
                     if(vendors.length !== 0){
                         data += `(`
-                        vendors.forEach(element => { data += `'${element.usr_code_seller}',` })
+                        vendors.forEach(element => { 
+                            if(element.usr_code_seller !== null && element.usr_code_seller !== '' && element.usr_code_seller !== undefined){
+                                data += `'${element.usr_code_seller}',`
+                            }
+                             
+                        })
                         data = data.slice(0, -1);
                         data += `)`                
-                        query += ` AND rpt4_seller_code in ` + data + ``;
+                        terms += ` AND rpt4_seller_code in ` + data + ``;
                     }else{
                         res.json([])
                     }     
                 }                
             }
-            query += `order by rpt4_client_code asc limit 20`;
+            let query = `SELECT distinct rpt4_client_code, rpt4_group FROM report_4 WHERE MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date) = YEAR(NOW()) ${terms} order by rpt4_client_code asc limit 20`
+
+            //query += `order by rpt4_client_code asc limit 20`;
             
             const result = await pool.query(query)
             
@@ -264,7 +285,7 @@ module.exports = {
         */  
        try {
             const { Class, Brand, SellerName, Rol, SellerCode,UsrId, Clients } = req.body;
-
+            //console.log('SellerName:::', SellerName)
             let inClients='';
             let data='';
             let terms ='';
@@ -280,7 +301,21 @@ module.exports = {
             if (Rol == '2'){              //rol de supervisor
                     
                 if( SellerName != undefined){
-                    terms += ` AND rpt4_seller RLIKE "` + SellerName + `"`;
+                    //console.log('entro', SellerName)
+                  let seller_code =  SellerName.split('|')
+                  //console.log('seller_code::', seller_code)
+                  data += `(`
+                  seller_code.forEach(element => { 
+                      if(element !== null && element !== '' && element !== undefined){
+                          data += `'${element}',`
+                      }
+                       
+                  })
+                  data = data.slice(0, -1);
+                  data += `)`
+                  terms += ` AND rpt4_seller_code in ` + data + ``;
+                  //console.log('result::', terms)
+                    //terms += ` AND rpt4_seller RLIKE "` + SellerName + `"`;
                 }else{
                     const vendors = await pool.query(`SELECT usr_code_seller FROM copyoic.users where usr_id_supervisor = '${UsrId}'`)                    
                     if(vendors.length !== 0){
@@ -313,10 +348,12 @@ module.exports = {
                 (select count(rpt4_avg_sales) from copyoic.report_4 where rpt4_client_code = a.rpt4_client_code  and MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date) ${terms}) as count_avg_sales,
 				(select sum(CAST(rpt4_avg_sales AS DECIMAL(10,2))) from copyoic.report_4 where MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date) ${terms}) as grandtotal_avg_sales, 
                 round((select sum(rpt4_avg_sales_units) from copyoic.report_4 where MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date) ${terms} )) as grandtotal_avg_sales_units,
-                round((select sum(rpt4_month_sales_units) from copyoic.report_4 where MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date) ${terms})) as grandtotal_month_sales_units
+                (select sum(CONVERT(SUBSTRING_INDEX(rpt4_month_sales_units,'-',-1),UNSIGNED INTEGER)) from copyoic.report_4 where MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date) ${terms}) as grandtotal_month_sales_units
                 FROM copyoic.report_4 as a WHERE MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date) = YEAR(NOW()) ${terms}`
                 query += ` order by rpt4_group asc`;
-                
+                console.log('______________________________________')
+                console.log('este es el query report 4', query)
+                console.log('**************************************')
                 const result = await pool.query(query)
                 res.json(result)
             }else{
