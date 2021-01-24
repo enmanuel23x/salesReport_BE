@@ -217,7 +217,7 @@ module.exports = {
             let query = `SELECT rpt4_client_code, rpt4_group,sum(CONVERT(SUBSTRING_INDEX(rpt4_avg_sales,'-',-1),UNSIGNED INTEGER)) AS num  
             FROM copyoic.report_4 
             WHERE MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date) = YEAR(NOW())
-            group by rpt4_client_code asc
+            group by rpt4_client_code
             order by sum(CONVERT(SUBSTRING_INDEX(rpt4_avg_sales,'-',-1),UNSIGNED INTEGER)) desc limit 20`
 
             
@@ -333,7 +333,16 @@ module.exports = {
     },
     async get_sellers (req, res, next) {
         try {
-            let query = `SELECT NOMBRE AS Seller FROM OIC_VENDEDOR`
+            let query = `
+            SELECT 
+	            NOMBRE AS Seller,
+	            VENDEDOR AS SellerCode,
+	            Usr.usr_id_supervisor AS usr_id_supervisor 
+                FROM oic_vendedor AS Vendedores 
+            LEFT JOIN 
+	            (SELECT * FROM users) AS Usr 
+            ON ( Vendedores.VENDEDOR = Usr.usr_code_seller) 
+            `
             const result = await pool.query(query)
             res.json(result)
         } catch (error) {
