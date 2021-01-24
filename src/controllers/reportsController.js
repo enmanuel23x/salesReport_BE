@@ -217,7 +217,7 @@ module.exports = {
             let query = `SELECT rpt4_client_code, rpt4_group,sum(CONVERT(SUBSTRING_INDEX(rpt4_avg_sales,'-',-1),UNSIGNED INTEGER)) AS num  
             FROM copyoic.report_4 
             WHERE MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date) = YEAR(NOW())
-            group by rpt4_client_code asc
+            group by rpt4_client_code
             order by sum(CONVERT(SUBSTRING_INDEX(rpt4_avg_sales,'-',-1),UNSIGNED INTEGER)) desc limit 20`
 
             
@@ -241,10 +241,10 @@ module.exports = {
         */  
        try {
             const { Class, Brand, SellerName, Rol, SellerCode,UsrId, Clients } = req.body;
-            //console.log('SellerName:::', SellerName)
             let inClients='';
             let data='';
             let terms ='';
+            dataresp=[]
             if( Class != undefined){
                 terms += ` AND rpt4_class = "` + Class + `"`;
             }
@@ -257,9 +257,7 @@ module.exports = {
             if (Rol == '2'){              //rol de supervisor
                     
                 if( SellerName != undefined){
-                    //console.log('entro', SellerName)
                   let seller_code =  SellerName.split('|')
-                  //console.log('seller_code::', seller_code)
                   data += `(`
                   seller_code.forEach(element => { 
                       if(element !== null && element !== '' && element !== undefined){
@@ -290,28 +288,49 @@ module.exports = {
                     }     
                 }                
             }
-
-            
             if(Clients.length !== 0){
-                Clients.forEach(element => {  inClients += `'${element.rpt4_client_code}',` })
-                inClients = inClients.slice(0, -1);
-                terms += ` AND rpt4_client_code IN (${inClients})`;
+                for (let index = 0; index < Clients.length; index++) {
 
-                let query = `SELECT rpt4_client_code, REPLACE(rpt4_group, '"','') as rpt4_group,  rpt4_article, REPLACE(rpt4_description, '"','') as rpt4_description, rpt4_avg_sales, rpt4_avg_sales_units,rpt4_month_sales_units, rpt4_seller_code, rpt4_seller, rpt4_class, rpt4_brand, rpt4_date,
-                (select sum(CAST(rpt4_avg_sales AS DECIMAL(10,2))) from copyoic.report_4 where rpt4_client_code = a.rpt4_client_code and MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date) ${terms}  ) as sum_avg_sales, 
-                round((select sum(rpt4_avg_sales_units) from copyoic.report_4 where rpt4_client_code = a.rpt4_client_code  and MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date) ${terms})) as sum_avg_sales_units,
-                round((select sum(rpt4_month_sales_units) from copyoic.report_4 where rpt4_client_code = a.rpt4_client_code  and MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date) ${terms})) as sum_month_sales_units,
-                (select count(rpt4_avg_sales) from copyoic.report_4 where rpt4_client_code = a.rpt4_client_code  and MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date) ${terms}) as count_avg_sales,
-				(select sum(CAST(rpt4_avg_sales AS DECIMAL(10,2))) from copyoic.report_4 where MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date) ${terms}) as grandtotal_avg_sales, 
-                round((select sum(rpt4_avg_sales_units) from copyoic.report_4 where MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date) ${terms} )) as grandtotal_avg_sales_units,
-                (select sum(CONVERT(SUBSTRING_INDEX(rpt4_month_sales_units,'-',-1),UNSIGNED INTEGER)) from copyoic.report_4 where MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date) ${terms}) as grandtotal_month_sales_units
-                FROM copyoic.report_4 as a WHERE MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date) = YEAR(NOW()) ${terms}`
-                query += ` order by rpt4_group asc`;
-                console.log('______________________________________')
-                console.log('este es el query report 4', query)
-                console.log('**************************************')
-                const result = await pool.query(query)
-                res.json(result)
+                    query = `SELECT 
+                        b.count_avg_sales,
+                        b.sum_avg_sales,
+                        b.sum_avg_sales_units,
+                        b.sum_month_sales_units,
+                        rpt4_client_code, REPLACE(rpt4_group, '"','') as rpt4_group,  
+                        rpt4_article, REPLACE(rpt4_description, '"','') as rpt4_description, 
+                        CAST(rpt4_avg_sales AS DECIMAL(10,2)) as rpt4_avg_sales, rpt4_avg_sales_units,rpt4_month_sales_units, rpt4_seller_code, 
+                        rpt4_seller, rpt4_class, rpt4_brand, rpt4_date
+                        FROM copyoic.report_4 a 
+                        inner join (SELECT 
+                        count(*) as count_avg_sales,
+                        rpt4_client_code as rpt4_client_code_b,
+                        sum(rpt4_avg_sales) as sum_avg_sales,
+                        sum(rpt4_avg_sales_units) as sum_avg_sales_units,
+                        sum(rpt4_month_sales_units) as sum_month_sales_units
+                        FROM (SELECT rpt4_client_code,    
+                        ROUND(CAST(rpt4_avg_sales AS DECIMAL(10,2))) as rpt4_avg_sales, 
+                        ROUND(CAST(rpt4_avg_sales_units AS DECIMAL(10,2))) as rpt4_avg_sales_units,
+                        ROUND(CAST(rpt4_month_sales_units AS DECIMAL(10,2))) as rpt4_month_sales_units
+                        FROM copyoic.report_4 a where 
+                        MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date) 
+                        ${terms} 
+                        and rpt4_client_code = '${Clients[index].rpt4_client_code}'
+                        order by CAST(rpt4_avg_sales AS DECIMAL(10,2)) desc limit 15) as report_4) b
+                        on a.rpt4_client_code = b.rpt4_client_code_b 
+                        where 
+                        MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date)
+                        ${terms} 
+                        and rpt4_client_code = '${Clients[index].rpt4_client_code}'
+                        order by CAST(rpt4_avg_sales AS DECIMAL(10,2)) desc limit 15 `
+
+                     const Result = await pool.query(query)
+                    if(Result.length !== 0){
+                        for (let index1 = 0; index1 < Result.length; index1++) {
+                            dataresp.push(Result[index1])
+                         }
+                    }    
+                }
+                res.json(dataresp)
             }else{
                 res.json([])
             }
@@ -333,7 +352,7 @@ module.exports = {
     },
     async get_sellers (req, res, next) {
         try {
-            let query = `SELECT NOMBRE AS Seller FROM OIC_VENDEDOR`
+            let query = `SELECT NOMBRE AS Seller FROM oic_vendedor`
             const result = await pool.query(query)
             res.json(result)
         } catch (error) {
