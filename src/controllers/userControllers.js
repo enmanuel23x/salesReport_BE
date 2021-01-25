@@ -37,7 +37,7 @@ module.exports = {
                     usrStatus: el.usr_status,
                     cliId: el.cli_id,
                     cliName: el.cli_name,
-                    usrSellerCode:el.usr_seller_code,
+                    usrSellerCode:el.usr_code_seller,
                     usrIdSupervisor:el.usr_id_supervisor
                 }
             }))
