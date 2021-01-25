@@ -268,8 +268,7 @@ module.exports = {
                   data = data.slice(0, -1);
                   data += `)`
                   terms += ` AND rpt4_seller_code in ` + data + ``;
-                  //console.log('result::', terms)
-                    //terms += ` AND rpt4_seller RLIKE "` + SellerName + `"`;
+
                 }else{
                     const vendors = await pool.query(`SELECT usr_code_seller FROM copyoic.users where usr_id_supervisor = '${UsrId}'`)                    
                     if(vendors.length !== 0){
@@ -288,6 +287,41 @@ module.exports = {
                     }     
                 }                
             }
+
+            if (Rol == '1'){              //rol de vendedor
+                
+                if( SellerName != undefined){
+                    let seller_code =  SellerName.split('|')
+                    data += `(`
+                    seller_code.forEach(element => { 
+                        if(element !== null && element !== '' && element !== undefined){
+                            data += `'${element}',`
+                        }
+                         
+                    })
+                    data = data.slice(0, -1);
+                    data += `)`
+                    terms += ` AND rpt4_seller_code in ` + data + ``;
+  
+                  }else{
+                      const vendors = await pool.query(`SELECT usr_code_seller FROM copyoic.users where usr_rol = '3'`)                    
+                      if(vendors.length !== 0){
+                          data += `(`
+                          vendors.forEach(element => { 
+                              if(element.usr_code_seller !== null && element.usr_code_seller !== '' && element.usr_code_seller !== undefined){
+                                  data += `'${element.usr_code_seller}',`
+                              }
+                               
+                          })
+                          data = data.slice(0, -1);
+                          data += `)`                
+                          terms += ` AND rpt4_seller_code in ` + data + ``;
+                      }else{
+                          res.json([])
+                      }     
+                  }   
+            }
+
             if(Clients.length !== 0){
                 for (let index = 0; index < Clients.length; index++) {
 
