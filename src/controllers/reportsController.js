@@ -299,7 +299,7 @@ module.exports = {
                         ${terms} 
                         and rpt3_client_code = '${Clients[index].rpt3_client_code}'
                         order by CAST(rpt3_avg_sales AS DECIMAL(10,2)) desc limit 10 `
-                        
+
                      const Result = await pool.query(query)
                     if(Result.length !== 0){
                         for (let index1 = 0; index1 < Result.length; index1++) {
@@ -345,6 +345,7 @@ module.exports = {
             const { Class, Brand, SellerName, Rol, SellerCode,UsrId, Clients } = req.body;
             let data='';
             let terms ='';
+            let query
             dataresp=[]
             if( Class != undefined){
                 terms += ` AND rpt4_class = "` + Class + `"`;
@@ -437,7 +438,6 @@ module.exports = {
                         ${terms} 
                         and rpt4_client_code = '${Clients[index].rpt4_client_code}'
                         order by CAST(rpt4_avg_sales AS DECIMAL(10,2)) desc limit 15 `
-
                      const Result = await pool.query(query)
                     if(Result.length !== 0){
                         for (let index1 = 0; index1 < Result.length; index1++) {
