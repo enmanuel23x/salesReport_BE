@@ -386,7 +386,16 @@ module.exports = {
     },
     async get_sellers (req, res, next) {
         try {
-            let query = `SELECT NOMBRE AS Seller FROM oic_vendedor`
+            let query = `
+            SELECT 
+	            NOMBRE AS Seller,
+	            VENDEDOR AS SellerCode,
+	            Usr.usr_id_supervisor AS usr_id_supervisor 
+                FROM oic_vendedor AS Vendedores 
+            LEFT JOIN 
+	            (SELECT * FROM users) AS Usr 
+            ON ( Vendedores.VENDEDOR = Usr.usr_code_seller) 
+            `
             const result = await pool.query(query)
             res.json(result)
         } catch (error) {
