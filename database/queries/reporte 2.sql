@@ -6,13 +6,13 @@ SELECT
  	vendedor.COD AS 'Codigo Vendedor',
  	vendedor.NOMBRE AS 'Vendedor',
  	vendedor.ACTIVO AS 'Vendedor Activo',
- 	DATE('2021-01-11') AS 'Date'
+ 	NOW() AS 'Date'
 				
 FROM cliente_oic AS cli 
 LEFT JOIN 
-	(SELECT hbl_days AS days, hbl_date, hbl_habiles_5 FROM habiles WHERE YEAR(hbl_date) = YEAR(DATE('2021-01-11')) AND MONTH(hbl_date) = MONTH(DATE('2021-01-11')))
+	(SELECT hbl_days AS days, hbl_date, hbl_habiles_5 FROM habiles WHERE YEAR(hbl_date) = YEAR(NOW()) AND MONTH(hbl_date) = MONTH(NOW()))
 		AS hbl
-	ON (YEAR(hbl.hbl_date) = YEAR(DATE('2021-01-11')) AND MONTH(hbl.hbl_date) = MONTH(DATE('2021-01-11')))
+	ON (YEAR(hbl.hbl_date) = YEAR(NOW()) AND MONTH(hbl.hbl_date) = MONTH(NOW()))
 LEFT JOIN 
 		(
 	 		SELECT 
@@ -25,7 +25,7 @@ LEFT JOIN
             FROM 
 	            base_oic2 AS x
             WHERE
-                (x.FECHA BETWEEN (last_day(DATE('2021-01-11') - INTERVAL 7 month) + interval 1 DAY) AND last_day(DATE('2021-01-11') - INTERVAL 1 month))
+                (x.FECHA BETWEEN (last_day(NOW() - INTERVAL 7 month) + interval 1 DAY) AND last_day(NOW() - INTERVAL 1 month))
 	            AND
                 (x.VTAS > 0 OR x.VTAS < 0)
                 AND
@@ -43,11 +43,11 @@ LEFT JOIN
             FROM 
 	            base_oic2 AS x
             LEFT JOIN 
-					(SELECT hbl_days AS days, hbl_date, hbl_habiles_5 FROM habiles WHERE YEAR(hbl_date) = YEAR(DATE('2021-01-11')) AND MONTH(hbl_date) = MONTH(DATE('2021-01-11')))
+					(SELECT hbl_days AS days, hbl_date, hbl_habiles_5 FROM habiles WHERE YEAR(hbl_date) = YEAR(NOW()) AND MONTH(hbl_date) = MONTH(NOW()))
 						AS hbl2
-					ON (YEAR(hbl2.hbl_date) = YEAR(DATE('2021-01-11')) AND MONTH(hbl2.hbl_date) = MONTH(DATE('2021-01-11')))
+					ON (YEAR(hbl2.hbl_date) = YEAR(NOW()) AND MONTH(hbl2.hbl_date) = MONTH(NOW()))
             WHERE 
-            	(FECHA BETWEEN DATE_FORMAT(DATE('2021-01-11') ,'%Y-%m-01') AND hbl2.hbl_habiles_5)
+            	(FECHA BETWEEN DATE_FORMAT(NOW() ,'%Y-%m-01') AND hbl2.hbl_habiles_5)
 	           	AND
                (x.VTAS > 0 OR x.VTAS < 0)
                AND
