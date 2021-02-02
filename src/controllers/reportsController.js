@@ -79,10 +79,12 @@ module.exports = {
             rpt1_seller_code,
             rpt1_seller,
             rpt1_seller_active,
-            rpt1_date
-            FROM report_1 WHERE MONTH(rpt1_date) = MONTH(NOW()) AND YEAR(rpt1_date) = YEAR(NOW()) ${terms} 
-            order by ROUND(CAST(rpt1_avg_sales AS DECIMAL(10,2))) desc`
-
+            DATE_ADD(rpt1_date, INTERVAL 2 DAY) AS rpt1_date
+            FROM report_1 `
+            if(terms != ''){
+                query += ` WHERE rpt1_group IS NOT NULL ${terms} `
+            }
+            query += ` order by ROUND(CAST(rpt1_avg_sales AS DECIMAL(10,2))) desc`
             const result = await pool.query(query)            
             res.json(result)            
         } catch (error) {
@@ -101,11 +103,8 @@ module.exports = {
             let query = ''
             dataresp=[]
             
-            if(Month && Year){
-                terms += ` WHERE MONTH(rpt2_date) = "${Month}" AND YEAR(rpt2_date) = "${Year}"`
-            }else{
-                terms += ` WHERE MONTH(rpt2_date) = MONTH(NOW()) AND YEAR(rpt2_date) = YEAR(NOW())`
-            }
+            terms += `WHERE rpt2_group IS NOT NULL `
+
             if( SellerActive != undefined){
                 terms += ` AND rpt2_seller_active = "` + SellerActive + `"`;
             }
@@ -166,7 +165,7 @@ module.exports = {
             ROUND(CAST(rpt2_first_week AS DECIMAL(10,2))) as rpt2_first_week,
             CAST(rpt2_scope AS DECIMAL(10,2)) as rpt2_scope,
             rpt2_seller, rpt2_seller_code,
-            rpt2_seller_active,  rpt2_date
+            rpt2_seller_active,  DATE_ADD(rpt2_date, INTERVAL 2 DAY) AS rpt2_date
              FROM copyoic.report_2 ${terms} order by ROUND(CAST(rpt2_avg_sales_weekly AS DECIMAL(10,2))) desc`           
 
             const result = await pool.query(query)
@@ -184,7 +183,7 @@ module.exports = {
             let query = `SELECT rpt3_client_code, rpt3_group,
             sum(CONVERT(SUBSTRING_INDEX(rpt3_avg_sales,'-',-1),UNSIGNED INTEGER)) AS num  
                         FROM copyoic.report_3 
-                        WHERE MONTH(rpt3_date) = MONTH(NOW()) AND YEAR(rpt3_date) = YEAR(NOW())
+                        WHERE rpt3_group IS NOT NULL
                         group by rpt3_client_code
                         order by sum(CONVERT(SUBSTRING_INDEX(rpt3_avg_sales,'-',-1),UNSIGNED INTEGER)) desc limit 20`
             
@@ -276,7 +275,7 @@ module.exports = {
                         b.sum_month_sales,
                         rpt3_client_code, REPLACE(rpt3_group, '"','') as rpt3_group,   
                         CAST(rpt3_avg_sales AS DECIMAL(10,2)) as rpt3_avg_sales, rpt3_scope_perc,rpt3_month_sales, rpt3_seller_code, 
-                        rpt3_seller, rpt3_brand, rpt3_date
+                        rpt3_seller, rpt3_brand, DATE_ADD(rpt3_date, INTERVAL 2 DAY) AS rpt3_date
                         FROM copyoic.report_3 a 
                         inner join (SELECT 
                         count(*) as count_scope_perc,
@@ -289,13 +288,13 @@ module.exports = {
                         ROUND(CAST(rpt3_scope_perc AS DECIMAL(10,2))) as rpt3_scope_perc,
                         ROUND(CAST(rpt3_month_sales AS DECIMAL(10,2))) as rpt3_month_sales
                         FROM copyoic.report_3 a where 
-                        MONTH(rpt3_date) = MONTH(NOW()) AND YEAR(rpt3_date) 
+                        rpt3_group IS NOT NULL
                         ${terms} 
                         and rpt3_client_code = '${Clients[index].rpt3_client_code}'
                         order by CAST(rpt3_avg_sales AS DECIMAL(10,2)) desc limit 10) as report_3) b
                         on a.rpt3_client_code = b.rpt3_client_code_b 
                         where 
-                        MONTH(rpt3_date) = MONTH(NOW()) AND YEAR(rpt3_date)
+                        rpt3_group IS NOT NULL
                         ${terms} 
                         and rpt3_client_code = '${Clients[index].rpt3_client_code}'
                         order by CAST(rpt3_avg_sales AS DECIMAL(10,2)) desc limit 10 `
@@ -325,7 +324,7 @@ module.exports = {
             
             let query = `SELECT rpt4_client_code, rpt4_group,sum(CONVERT(SUBSTRING_INDEX(rpt4_avg_sales,'-',-1),UNSIGNED INTEGER)) AS num  
             FROM copyoic.report_4 
-            WHERE MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date) = YEAR(NOW())
+            WHERE rpt4_group IS NOT NULL
             group by rpt4_client_code
             order by sum(CONVERT(SUBSTRING_INDEX(rpt4_avg_sales,'-',-1),UNSIGNED INTEGER)) desc limit 20`
 
@@ -415,7 +414,7 @@ module.exports = {
                         rpt4_client_code, REPLACE(rpt4_group, '"','') as rpt4_group,  
                         rpt4_article, REPLACE(rpt4_description, '"','') as rpt4_description, 
                         CAST(rpt4_avg_sales AS DECIMAL(10,2)) as rpt4_avg_sales, rpt4_avg_sales_units,rpt4_month_sales_units, rpt4_seller_code, 
-                        rpt4_seller, rpt4_class, rpt4_brand, rpt4_date
+                        rpt4_seller, rpt4_class, rpt4_brand, DATE_ADD(rpt4_date, INTERVAL 2 DAY) AS rpt4_date
                         FROM copyoic.report_4 a 
                         inner join (SELECT 
                         count(*) as count_avg_sales,
@@ -428,13 +427,13 @@ module.exports = {
                         ROUND(CAST(rpt4_avg_sales_units AS DECIMAL(10,2))) as rpt4_avg_sales_units,
                         ROUND(CAST(rpt4_month_sales_units AS DECIMAL(10,2))) as rpt4_month_sales_units
                         FROM copyoic.report_4 a where 
-                        MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date) 
+                        rpt4_group IS NOT NULL 
                         ${terms} 
                         and rpt4_client_code = '${Clients[index].rpt4_client_code}'
                         order by CAST(rpt4_avg_sales AS DECIMAL(10,2)) desc limit 15) as report_4) b
                         on a.rpt4_client_code = b.rpt4_client_code_b 
                         where 
-                        MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date)
+                        rpt4_group IS NOT NULL
                         ${terms} 
                         and rpt4_client_code = '${Clients[index].rpt4_client_code}'
                         order by CAST(rpt4_avg_sales AS DECIMAL(10,2)) desc limit 15 `
@@ -487,7 +486,7 @@ module.exports = {
    
     async get_report_4_brand (req, res, next) {
         try {
-            let query = `SELECT DISTINCT rpt4_brand from report_4 WHERE MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date) = YEAR(NOW())`
+            let query = `SELECT DISTINCT rpt4_brand from report_4 WHERE rpt4_group IS NOT NULL`
             const result = await pool.query(query)
             res.json(result)
         } catch (error) {
@@ -497,7 +496,7 @@ module.exports = {
     },
     async get_report_4_class (req, res, next) {
         try {
-            let query = `SELECT DISTINCT rpt4_class from report_4 WHERE MONTH(rpt4_date) = MONTH(NOW()) AND YEAR(rpt4_date) = YEAR(NOW())`
+            let query = `SELECT DISTINCT rpt4_class from report_4 WHERE rpt4_group IS NOT NULL`
             const result = await pool.query(query)
             res.json(result)
         } catch (error) {

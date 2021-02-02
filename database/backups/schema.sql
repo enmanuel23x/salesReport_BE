@@ -153,3 +153,13 @@ CREATE TABLE IF NOT EXISTS `copyOIC`.`report_4` (
 	`rpt4_brand` varchar(256) DEFAULT NULL,
 	`rpt4_date` date DEFAULT NULL
 );
+
+DROP TABLE IF EXISTS `copyoic`.`report_5`;
+CREATE TABLE IF NOT EXISTS `report_5` (
+  `rpt5_description` varchar(256) DEFAULT NULL,
+  `rpt5_article_code` varchar(256) DEFAULT NULL,
+  `rpt5_vtaCantidad_1` varchar(256) DEFAULT NULL,
+  `rpt5_vtaCantidad_2` varchar(256) DEFAULT NULL,
+  `rpt5_vtaCantidad_3` varchar(256) DEFAULT NULL,
+  `rpt5_vtaCantidad_4` varchar(256) DEFAULT NULL
+
