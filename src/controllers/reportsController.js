@@ -281,7 +281,7 @@ module.exports = {
                         count(*) as count_scope_perc,
                         rpt3_client_code as rpt3_client_code_b,
                         sum(rpt3_avg_sales) as sum_avg_sales,
-                        sum(rpt3_scope_perc) as prom_scope_perc,
+                        sum(rpt3_scope_perc)/count(rpt3_scope_perc) as prom_scope_perc,
                         sum(rpt3_month_sales) as sum_month_sales
                         FROM (SELECT rpt3_client_code,    
                         ROUND(CAST(rpt3_avg_sales AS DECIMAL(10,2))) as rpt3_avg_sales, 
