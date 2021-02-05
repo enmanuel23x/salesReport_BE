@@ -281,7 +281,7 @@ module.exports = {
                         count(*) as count_scope_perc,
                         rpt3_client_code as rpt3_client_code_b,
                         sum(rpt3_avg_sales) as sum_avg_sales,
-                        sum(rpt3_scope_perc) as prom_scope_perc,
+                        sum(rpt3_scope_perc)/count(rpt3_scope_perc) as prom_scope_perc,
                         sum(rpt3_month_sales) as sum_month_sales
                         FROM (SELECT rpt3_client_code,    
                         ROUND(CAST(rpt3_avg_sales AS DECIMAL(10,2))) as rpt3_avg_sales, 
@@ -456,9 +456,38 @@ module.exports = {
     },
     async get_report_5 (req, res, next) {
         try {
-            let data='';
-            const result = {}
-            res.json(result)
+            const { clientName } = req.body
+            const classification = await pool.query(`SELECT DISTINCT rpt5_class FROM report_5 ${clientName == undefined ? '' : `WHERE rpt5_group LIKE '${clientName}'`} ORDER BY rpt5_class ASC`)
+            let result = [], request = [], total = {};
+            for (let index = 0; index < classification.length; index++) {
+                request = await pool.query(`SELECT 
+                                                * 
+                                            FROM 
+                                                report_5
+                                            WHERE 
+                                                rpt5_class = '${classification[index].rpt5_class}' 
+                                                ${clientName == undefined ? '' : ` AND rpt5_group LIKE '${clientName}' `} 
+                                            ORDER BY 
+                                                (rpt5_vtaCantidad_1 + rpt5_vtaCantidad_2 + rpt5_vtaCantidad_3 + rpt5_vtaCantidad_4) DESC`)
+                result.push({
+                    rpt5_class: classification[index].rpt5_class, 
+                    children: request, 
+                    subTotal: {
+                        sumVtaCantidad1: request.reduce((accum, obj) => parseFloat(accum) + parseFloat(obj.rpt5_vtaCantidad_1), 0),
+                        sumVtaCantidad2: request.reduce((accum, obj) => parseFloat(accum) + parseFloat(obj.rpt5_vtaCantidad_2), 0),
+                        sumVtaCantidad3: request.reduce((accum, obj) => parseFloat(accum) + parseFloat(obj.rpt5_vtaCantidad_3), 0),
+                        sumVtaCantidad4: request.reduce((accum, obj) => parseFloat(accum) + parseFloat(obj.rpt5_vtaCantidad_4), 0)
+                    }
+                        
+                })
+            }
+            total = {
+                sumVtaCantidad1: result.reduce((accum, obj) => parseFloat(accum) + parseFloat(obj.subTotal.sumVtaCantidad1), 0),
+                sumVtaCantidad2: result.reduce((accum, obj) => parseFloat(accum) + parseFloat(obj.subTotal.sumVtaCantidad2), 0),
+                sumVtaCantidad3: result.reduce((accum, obj) => parseFloat(accum) + parseFloat(obj.subTotal.sumVtaCantidad3), 0),
+                sumVtaCantidad4: result.reduce((accum, obj) => parseFloat(accum) + parseFloat(obj.subTotal.sumVtaCantidad4), 0)
+            }
+            res.json({items: result, total})
         } catch (error) {
             console.error(error)
             res.send("ERROR")
@@ -498,6 +527,15 @@ module.exports = {
         try {
             let query = `SELECT DISTINCT rpt4_class from report_4 WHERE rpt4_group IS NOT NULL`
             const result = await pool.query(query)
+            res.json(result)
+        } catch (error) {
+            console.error(error)
+            res.send("ERROR")
+        }
+    },
+    async get_report_5_client (req, res, next) {
+        try {
+            const result = await pool.query(`SELECT DISTINCT rpt5_group FROM report_5 ORDER BY rpt5_group ASC`)       
             res.json(result)
         } catch (error) {
             console.error(error)
