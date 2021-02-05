@@ -456,7 +456,7 @@ module.exports = {
     },
     async get_report_5 (req, res, next) {
         try {
-            const { clientName } = req.body;//'CONSTRUGRECIA%';
+            const { clientName } = req.body
             const classification = await pool.query(`SELECT DISTINCT rpt5_class FROM report_5 ${clientName == undefined ? '' : `WHERE rpt5_group LIKE '${clientName}'`} ORDER BY rpt5_class ASC`)
             let result = [], request = [], total = {};
             for (let index = 0; index < classification.length; index++) {
