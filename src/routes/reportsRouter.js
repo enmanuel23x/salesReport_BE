@@ -13,6 +13,7 @@ const uriReport4Class = '/report_4/class';
 const uriReport5Client = '/report_5/client';
 const uriReport_3Top20Clients = '/report_3/top20clients';
 const uriReport_4Top20Clients = '/report_4/top20clients';
+const uriReport5Month = '/report_5/month';
 
 reportsRouter.route(uriReport_1)
     .post(reportsController.get_report_1)
@@ -46,6 +47,11 @@ reportsRouter.route(uriReport4Class)
 
 reportsRouter.route(uriReport5Client)
     .get(reportsController.get_report_5_client)
+
+reportsRouter.route(uriReport5Month)
+    .get(reportsController.get_report_5_month)
+
+    
 
 
 module.exports = reportsRouter;

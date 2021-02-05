@@ -541,5 +541,22 @@ module.exports = {
             console.error(error)
             res.send("ERROR")
         }
+    },
+    async get_report_5_month (req, res, next) {
+        try {
+            const result = await pool.query(`select Date_format( DATE_SUB(NOW(),INTERVAL '1' MONTH), '%m-%d-%Y') as month
+            union 
+            select Date_format( DATE_SUB(NOW(),INTERVAL '2' MONTH), '%m-%d-%Y') as month 
+            union 
+            select Date_format( DATE_SUB(NOW(),INTERVAL '3' MONTH), '%m-%d-%Y') as month 
+            union 
+            select Date_format( DATE_SUB(NOW(),INTERVAL '4' MONTH), '%m-%d-%Y') as month`)       
+            res.json(result)
+        } catch (error) {
+            console.error(error)
+            res.send("ERROR")
+        }
     }
+
+
 };
