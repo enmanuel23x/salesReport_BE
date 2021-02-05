@@ -16,7 +16,8 @@ module.exports = {
                     cliId: el.cli_id,
                     cliName: el.cli_name,
                     usrSellerCode:el.usr_seller_code,
-                    usrIdSupervisor:el.usr_id_supervisor
+                    usrIdSupervisor:el.usr_id_supervisor,
+                    usrTeleventa: el.usr_televenta
                 }
             }))
         } catch (error) {
@@ -38,7 +39,8 @@ module.exports = {
                     cliId: el.cli_id,
                     cliName: el.cli_name,
                     usrSellerCode:el.usr_code_seller,
-                    usrIdSupervisor:el.usr_id_supervisor
+                    usrIdSupervisor:el.usr_id_supervisor,
+                    usrTeleventa: el.usr_televenta
                 }
             }))
         } catch (error) {
@@ -61,7 +63,8 @@ module.exports = {
                 cliId: result[0].cli_id,
                 cliName: result[0].cli_name,
                 usrSellerCode:result[0].usr_seller_code,
-                usrIdSupervisor:result[0].usr_id_supervisor
+                usrIdSupervisor:result[0].usr_id_supervisor,
+                usrTeleventa: result[0].usr_televenta
             });
         } catch (error) {
             console.error(error);
@@ -85,7 +88,8 @@ module.exports = {
                     cliId: el.cli_id,
                     cliName: el.cli_name,
                     usrSellerCode:el.usr_code_seller,
-                    usrIdSupervisor:el.usr_id_supervisor
+                    usrIdSupervisor:el.usr_id_supervisor,
+                    usrTeleventa: el.usr_televenta
                 }
             }));
         } catch (error) {
@@ -110,7 +114,7 @@ module.exports = {
 	                usr_email = "${usr_email}" ;
             `
             const result = await pool.query(query);
-            res.json({
+            res.json({ 
                 usrId: result[0].usr_id,
                 usrName: result[0].usr_name,
                 usrLastName: result[0].usr_last_name,
@@ -120,7 +124,8 @@ module.exports = {
                 cliId: result[0].cli_id,
                 cliName: result[0].cli_name,
                 usrSellerCode: result[0].usr_code_seller,
-                usrIdSupervisor:result[0].usr_id_supervisor
+                usrIdSupervisor:result[0].usr_id_supervisor,
+                usrTeleventa: result[0].usr_televenta
             });
         } catch (error) {
             console.error(error);
@@ -147,7 +152,8 @@ module.exports = {
                 usrStatus: result[0].usr_status,
                 cliId: result[0].cli_id,
                 cliName: result[0].cli_name,
-                usrSellerCode: result[0].sellerCode
+                usrSellerCode: result[0].sellerCode,
+                usrTeleventa: result[0].usr_televenta
             });
 
         } catch (error) {
