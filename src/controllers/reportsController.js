@@ -509,7 +509,7 @@ module.exports = {
 
             const classification = await pool.query(`SELECT DISTINCT rpt5_class FROM report_5 WHERE rpt5_group LIKE '%${Client}%'${terms} ORDER BY rpt5_class ASC`)
 
-            let result = [], request = [], total = {};
+            let result = [], request = [], total = {}, date = '';
             for (let index = 0; index < classification.length; index++) {
                 request = await pool.query(`SELECT 
                                                 * 
@@ -520,9 +520,12 @@ module.exports = {
                                                 ${Client == undefined ? '' : ` AND rpt5_group LIKE '%${Client}%' `} 
                                             ORDER BY 
                                                 (rpt5_vtaCantidad_1 + rpt5_vtaCantidad_2 + rpt5_vtaCantidad_3 + rpt5_vtaCantidad_4) DESC limit 5`)
-                result.push({
+                
+                    date = request[0].rpt5_date;
+                                                result.push({
                     rpt5_class: classification[index].rpt5_class, 
                     children: request, 
+                    
                     subTotal: {
                         sumVtaCantidad1: request.reduce((accum, obj) => parseFloat(accum) + parseFloat(obj.rpt5_vtaCantidad_1), 0),
                         sumVtaCantidad2: request.reduce((accum, obj) => parseFloat(accum) + parseFloat(obj.rpt5_vtaCantidad_2), 0),
@@ -539,7 +542,7 @@ module.exports = {
                 sumVtaCantidad4: result.reduce((accum, obj) => parseFloat(accum) + parseFloat(obj.subTotal.sumVtaCantidad4), 0)
             }
 
-            res.json({items: result, total})
+            res.json({items: result, total, date})
         } catch (error) {
             console.error(error)
             res.send("ERROR")
