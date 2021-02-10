@@ -7,7 +7,7 @@ base4.Suma AS 'Col1',
 base3.Suma AS 'Col2',
 base2.Suma AS 'Col3',
 base1.Suma AS 'Col4',
-base.VENDEDOR AS 'Codigo Vendedor',
+base.VENDEDOR AS 'Codigo_Vendedor',
 base.VENNOM AS 'Vendedor',
 NOW() AS Date
 

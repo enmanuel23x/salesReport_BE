@@ -46,10 +46,10 @@ reportsRouter.route(uriReport4Class)
     .get(reportsController.get_report_4_class)
 
 reportsRouter.route(uriReport5Client)
-    .get(reportsController.get_report_5_client)
+    .post(reportsController.get_report_5_client)
 
 reportsRouter.route(uriReport5Month)
-    .get(reportsController.get_report_5_month)
+    .post(reportsController.get_report_5_month)
 
     
 
