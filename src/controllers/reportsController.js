@@ -458,81 +458,30 @@ module.exports = {
 
         
         try {
-            const { Client, SellerCode, Rol, UsrId} = req.body
-            let data=''
-            let terms ='';   
-
-            if (Rol == '3'){              //rol de vendedor
-                terms += ` AND rpt5_seller_code = "` + SellerCode + `"`;
-            }
-
-            if (Rol == '2'){              //rol de supervisor
-                
-                     
-                    const vendors = await pool.query(`SELECT usr_code_seller FROM copyoic.users where usr_id_supervisor = '${UsrId}'`)                    
-
-                    if(vendors.length !== 0){
-                        data += `(`
-                        vendors.forEach(element => { 
-                            if(element.usr_code_seller !== null && element.usr_code_seller !== '' && element.usr_code_seller !== undefined){
-                                data += `'${element.usr_code_seller}',`
-                            }
-                             
-                        })
-                        data = data.slice(0, -1);
-                        data += `)`                
-                        terms += ` AND rpt5_seller_code in ${data} `;
-                    }else{
-                        res.json([])
-                    }     
-                                
-            }
-            if (Rol == '1' || Rol == '4'){              //rol de administrador
-                
-                const vendors = await pool.query(`SELECT usr_code_seller FROM copyoic.users where usr_rol = '3'`)                    
-                if(vendors.length !== 0){
-                    data += `(`
-                    vendors.forEach(element => { 
-                        if(element.usr_code_seller !== null && element.usr_code_seller !== '' && element.usr_code_seller !== undefined){
-                            data += `'${element.usr_code_seller}',`
-                        }
-                         
-                    })
-                    data = data.slice(0, -1);
-                    data += `)`                
-                    terms += ` AND rpt5_seller_code in ${data} `;
-                  }else{
-                    res.json([])
-                }     
-               
-      }
-
-            const classification = await pool.query(`SELECT DISTINCT rpt5_class FROM report_5 WHERE rpt5_group LIKE '%${Client}%'${terms} ORDER BY rpt5_class ASC`)
-
-            let result = [], request = [], total = {}, date = '';
+            const { clientCode } = req.body;
+            const classification = await pool.query(`SELECT DISTINCT rpt5_class FROM report_5 ${clientCode == undefined ? '' : `WHERE rpt5_client_code LIKE '${clientCode}'`} ORDER BY rpt5_class ASC`)
+            let result = [], request = [], total = {};
             for (let index = 0; index < classification.length; index++) {
                 request = await pool.query(`SELECT 
-                                                * 
+                                                *,
+                                                DATE_ADD(rpt5_date, INTERVAL 1 DAY) AS rpt5_date
                                             FROM 
                                                 report_5
                                             WHERE 
                                                 rpt5_class = '${classification[index].rpt5_class}' 
-                                                ${Client == undefined ? '' : ` AND rpt5_group LIKE '%${Client}%' `} 
+                                                ${clientCode == undefined ? '' : ` AND rpt5_client_code LIKE '${clientCode}' `} 
                                             ORDER BY 
-                                                (rpt5_vtaCantidad_1 + rpt5_vtaCantidad_2 + rpt5_vtaCantidad_3 + rpt5_vtaCantidad_4) DESC limit 5`)
-                
-                    date = request[0].rpt5_date;
-                                                result.push({
+                                                (rpt5_vtaCantidad_1 + rpt5_vtaCantidad_2 + rpt5_vtaCantidad_3 + rpt5_vtaCantidad_4) DESC`)
+                result.push({
                     rpt5_class: classification[index].rpt5_class, 
                     children: request, 
-                    
                     subTotal: {
                         sumVtaCantidad1: request.reduce((accum, obj) => parseFloat(accum) + parseFloat(obj.rpt5_vtaCantidad_1), 0),
                         sumVtaCantidad2: request.reduce((accum, obj) => parseFloat(accum) + parseFloat(obj.rpt5_vtaCantidad_2), 0),
                         sumVtaCantidad3: request.reduce((accum, obj) => parseFloat(accum) + parseFloat(obj.rpt5_vtaCantidad_3), 0),
                         sumVtaCantidad4: request.reduce((accum, obj) => parseFloat(accum) + parseFloat(obj.rpt5_vtaCantidad_4), 0)
                     }
-                        
+
                 })
             }
             total = {
@@ -541,8 +490,7 @@ module.exports = {
                 sumVtaCantidad3: result.reduce((accum, obj) => parseFloat(accum) + parseFloat(obj.subTotal.sumVtaCantidad3), 0),
                 sumVtaCantidad4: result.reduce((accum, obj) => parseFloat(accum) + parseFloat(obj.subTotal.sumVtaCantidad4), 0)
             }
-
-            res.json({items: result, total, date})
+            res.json({items: result, total})
         } catch (error) {
             console.error(error)
             res.send("ERROR")
@@ -590,34 +538,46 @@ module.exports = {
     },
     async get_report_5_client (req, res, next) {
         try {
-
-            const result = await pool.query(`SELECT * FROM  
-            (SELECT 
-                CLIENTE,
-              U_AGRUPACION, 
-              VENDEDOR,
-              VENNOM,
-               sum(cast(VTAS AS DECIMAL(10,2))) as sumaVtas
-           FROM 
-                base_oic2 
-           WHERE
-              FECHA < DATE_FORMAT(NOW() ,'%Y-%m-01')
-              AND 
-                FECHA >= DATE_ADD(DATE_FORMAT(NOW() ,'%Y-%m-01'), INTERVAL -4 MONTH) 
-              AND 
-                U_AGRUPACION IS NOT NULL 
-           group by 
-                CLIENTE,
-                U_AGRUPACION, 
-                VENNOM,
-                VENDEDOR
-           order by 
-                sumaVtas DESC, 
-                VENNOM 
-            DESC limit 20) AS base_oic2
-        order BY 
-            sumaVtas asc 
-        limit 5`)   
+            const { UsrId } = req.body;
+            const vendors = await pool.query(`SELECT usr_code_seller FROM copyoic.users where usr_id_supervisor = '${UsrId}'  AND usr_code_seller IS NOT NULL`);
+            const usr_code_seller = await pool.query(`SELECT usr_code_seller FROM copyoic.users where usr_id = '${UsrId}'`);
+            let result, SellersCodes = '';
+            if(SellersCodes == ''){
+                SellersCodes = usr_code_seller[0].usr_code_seller
+            }                    
+            if(vendors.length !== 0){
+                for (let index = 0; index < vendors.length; index++) {
+                    if(SellersCodes == ''){
+                        SellersCodes = vendors[index].usr_code_seller
+                    }else{
+                        SellersCodes += '|'+vendors[index].usr_code_seller
+                    }
+                }
+            }
+            result = await pool.query(`
+            SELECT 
+            clients.rpt5_client_code,
+            clients.rpt5_group
+        FROM (
+            SELECT 
+                rpt5_client_code,
+                rpt5_group,
+                (SUM(rpt5_vtaCantidad_1) + SUM(rpt5_vtaCantidad_2) + SUM(rpt5_vtaCantidad_3) + SUM(rpt5_vtaCantidad_4)) AS suma
+            FROM 
+                report_5
+            WHERE
+                report_5.rpt5_seller_code RLIKE '${SellersCodes}'
+            GROUP BY 
+                rpt5_client_code,
+                rpt5_group
+            ORDER BY 
+                suma DESC
+            LIMIT 20
+            ) AS clients
+        ORDER BY 
+            suma ASC
+        LIMIT 5
+        `)   
                
             res.json(result)
         } catch (error) {
@@ -628,13 +588,15 @@ module.exports = {
     async get_report_5_month (req, res, next) {
  
         try {
-            const result = await pool.query(`select Date_format( DATE_SUB(NOW(),INTERVAL '1' MONTH), '%m-%d-%Y') as month
-            union 
-            select Date_format( DATE_SUB(NOW(),INTERVAL '2' MONTH), '%m-%d-%Y') as month 
-            union 
-            select Date_format( DATE_SUB(NOW(),INTERVAL '3' MONTH), '%m-%d-%Y') as month 
-            union 
-            select Date_format( DATE_SUB(NOW(),INTERVAL '4' MONTH), '%m-%d-%Y') as month`)       
+            const result = await pool.query(`
+            SELECT  Date_format( DATE_SUB(base.rpt5_date,INTERVAL '1' MONTH), '%m-%d-%Y') as month FROM (SELECT rpt5_date FROM report_5 LIMIT 1) AS base
+        UNION
+            SELECT  Date_format( DATE_SUB(base.rpt5_date,INTERVAL '2' MONTH), '%m-%d-%Y') as month FROM (SELECT rpt5_date FROM report_5 LIMIT 1) AS base
+        UNION
+            SELECT  Date_format( DATE_SUB(base.rpt5_date,INTERVAL '3' MONTH), '%m-%d-%Y') as month FROM (SELECT rpt5_date FROM report_5 LIMIT 1) AS base
+        UNION
+            SELECT  Date_format( DATE_SUB(base.rpt5_date,INTERVAL '4' MONTH), '%m-%d-%Y') as month FROM (SELECT rpt5_date FROM report_5 LIMIT 1) AS base
+            `)       
             res.json(result)
         } catch (error) {
             console.error(error)

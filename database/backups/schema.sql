@@ -155,7 +155,8 @@ CREATE TABLE IF NOT EXISTS `copyoic`.`report_4` (
 );
 
 DROP TABLE IF EXISTS `copyoic`.`report_5`;
-CREATE TABLE IF NOT EXISTS `report_5` (
+CREATE TABLE IF NOT EXISTS `copyoic`.`report_5` (
+  `rpt5_client_code` varchar(256) DEFAULT NULL,
   `rpt5_group` varchar(256) DEFAULT NULL,
   `rpt5_article_code` varchar(256) DEFAULT NULL,
   `rpt5_class` varchar(256) DEFAULT NULL,
