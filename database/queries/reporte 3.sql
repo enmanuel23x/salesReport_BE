@@ -56,7 +56,7 @@ LEFT JOIN
 	ON ( cli.CODIGO_VENDEDOR = vendedor.COD )
 	WHERE 
 		base.agr IS NOT NULL
-		AND 
+    AND 
 		ROUND(((base2.sumvtas/ NULLIF(base.promvtas, 0) )*100),2) <= 70
 	ORDER BY cli.CLIENTE, base.MARCA
 	;

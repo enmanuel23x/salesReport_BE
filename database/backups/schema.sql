@@ -104,7 +104,6 @@ CREATE TABLE IF NOT EXISTS `copyoic`.`report_1` (
 	`rpt1_avg_sales` varchar(256) DEFAULT NULL,
   	`rpt1_last_month` varchar(256) DEFAULT NULL,
   	`rpt1_scope` varchar(256) DEFAULT NULL,
-  	`rpt1_sales` varchar(256) DEFAULT NULL,
 	`rpt1_abc` varchar(10) DEFAULT NULL,
   	`rpt1_seller_code` varchar(256) DEFAULT NULL,
   	`rpt1_seller` varchar(256) DEFAULT NULL,

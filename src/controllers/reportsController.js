@@ -318,26 +318,6 @@ module.exports = {
         }
     },
 
-    async get_report_4_top20_clients (req, res, next) {
-
-        try { 
-            
-            let query = `SELECT rpt4_client_code, rpt4_group,sum(CONVERT(SUBSTRING_INDEX(rpt4_avg_sales,'-',-1),UNSIGNED INTEGER)) AS num  
-            FROM copyoic.report_4 
-            WHERE rpt4_group IS NOT NULL
-            group by rpt4_client_code
-            order by sum(CONVERT(SUBSTRING_INDEX(rpt4_avg_sales,'-',-1),UNSIGNED INTEGER)) desc limit 20`
-
-            
-            const result = await pool.query(query)
-            
-            res.json(result)
-        } catch (error) {
-            console.error(error)
-            res.send("ERROR")
-        }
-    },
-
     async get_report_4 (req, res, next) {
 
        try {
@@ -604,5 +584,4 @@ module.exports = {
         }
     }
 
-
-};
+  };

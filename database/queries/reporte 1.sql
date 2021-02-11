@@ -5,7 +5,7 @@ SELECT
  	ROUND(base.alc*100, 2) AS 'Alcance',
  	vendedor.COD AS 'Codigo Vendedor',
  	vendedor.NOMBRE AS 'Vendedor',
-	vendedor.ACTIVO AS 'Vendedor Activo',
+  vendedor.ACTIVO AS 'Vendedor Activo',
  	NOW() AS 'Date'
 				
 FROM 

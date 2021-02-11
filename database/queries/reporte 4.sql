@@ -9,7 +9,7 @@ SELECT
  	vendedor.COD AS 'Codigo Vendedor',
  	vendedor.NOMBRE AS 'Vendedor',
  	base.CLAS AS 'Clasificacion',
-	base.MARCA AS 'Marca',
+  base.MARCA AS 'Marca',
  	NOW() AS 'Date'
 	
 				
