@@ -114,7 +114,7 @@ module.exports = {
 	                usr_email = "${usr_email}" ;
             `
             const result = await pool.query(query);
-            res.json({ 
+            res.json(result.length == 0 ? {} : { 
                 usrId: result[0].usr_id,
                 usrName: result[0].usr_name,
                 usrLastName: result[0].usr_last_name,
@@ -125,8 +125,8 @@ module.exports = {
                 cliName: result[0].cli_name,
                 usrSellerCode: result[0].usr_code_seller,
                 usrIdSupervisor:result[0].usr_id_supervisor,
-                usrTeleventa: result[0].usr_televenta
-            });
+                usrTeleventa: result[0].usr_televenta}
+            );
         } catch (error) {
             console.error(error);
             res.send("ERROR");
