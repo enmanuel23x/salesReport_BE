@@ -592,19 +592,32 @@ module.exports = {
         try {
 
             const result = await pool.query(`SELECT * FROM  
-            (SELECT CLIENTE,
+            (SELECT 
+                CLIENTE,
+              U_AGRUPACION, 
+              VENDEDOR,
+              VENNOM,
+               sum(cast(VTAS AS DECIMAL(10,2))) as sumaVtas
+           FROM 
+                base_oic2 
+           WHERE
+              FECHA < DATE_FORMAT(NOW() ,'%Y-%m-01')
+              AND 
+                FECHA >= DATE_ADD(DATE_FORMAT(NOW() ,'%Y-%m-01'), INTERVAL -4 MONTH) 
+              AND 
+                U_AGRUPACION IS NOT NULL 
+           group by 
+                CLIENTE,
                 U_AGRUPACION, 
-                VENDEDOR,
                 VENNOM,
-            sum(cast(VTAS AS DECIMAL(10,2))) as sumaVtas
-            FROM copyoic.base_oic2 
-            WHERE
-             FECHA < DATE_FORMAT(NOW() ,'%Y-%m-01')
-             AND FECHA >= DATE_ADD(DATE_FORMAT(NOW() ,'%Y-%m-01'), INTERVAL -4 MONTH) 
-              AND U_AGRUPACION IS NOT NULL 
-             group by U_AGRUPACION, VENNOM
-            order by sum(cast(VTAS AS DECIMAL(10,2))) DESC, VENNOM DESC limit 20) AS base_oic2
-            order by sumaVtas asc limit 5`)   
+                VENDEDOR
+           order by 
+                sumaVtas DESC, 
+                VENNOM 
+            DESC limit 20) AS base_oic2
+        order BY 
+            sumaVtas asc 
+        limit 5`)   
                
             res.json(result)
         } catch (error) {
