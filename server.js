@@ -24,4 +24,4 @@ app.use(version, hblRouter)
 //Server
 app.set('port', PORT);
 const server = http.createServer(app)
-server.listen(PORT, () => console.log(`Backend solicitud S-TA-24 corriendo en localhost:${PORT}`));
+server.listen(PORT, () => console.log(`Backend solicitud salesReport corriendo en localhost:${PORT}`));
