@@ -49,7 +49,7 @@ module.exports = {
                 }                
             }
 
-            if (Rol == '1'){              //rol de administrador
+            if (Rol == '1' || Rol == '4'){              //rol de administrador y desarrollador
                 
                 if( SellerName != undefined){
                     let sellerName_ ='';
@@ -158,11 +158,30 @@ module.exports = {
                 }                
             }
 
-            if (Rol == '1'){              //rol de administrador
+            if (Rol == '1' || Rol == '4'){              //rol de administrador y desarrollador
                 
                 if( SellerName != undefined){
-                    terms += ` AND rpt2_seller RLIKE "` + SellerName + `"`;
-  
+                    let sellerName_ ='';
+                    let vendors_ = []
+                    let idSupervisor = ''
+                    let arrayVendors = SellerName.split('|'); 
+                    for (let index = 0; index < arrayVendors.length; index++) {
+                        if(arrayVendors[index].substr(0,1) === '_'){
+                            idSupervisor = arrayVendors[index].substr(1)
+                            vendors_ = await pool.query(`select usr_name as usrName, usr_last_name as usrLastName
+                            from users where usr_id_supervisor = '${idSupervisor}' and usr_status = 0`)                    
+                            
+                        }else{
+                            sellerName_+= `${arrayVendors[index]}|`
+                        }
+                        if(vendors_.length !== 0){
+                            vendors_.forEach(x => {
+                                sellerName_+= `${x.usrName} ${x.usrLastName}|`
+                            })
+                        }
+                    }                    
+                    sellerName_ = sellerName_.slice(0, -1);
+                    terms += ` AND rpt2_seller RLIKE "` + sellerName_ + `"`;  
                   }else{
                       const vendors = await pool.query(`SELECT usr_code_seller FROM copyoic.users where usr_rol = '3'`)                    
                       if(vendors.length !== 0){
@@ -264,11 +283,30 @@ module.exports = {
                 }                
             }
 
-            if (Rol == '1'){              //rol de administrador
+            if (Rol == '1' || Rol == '4'){              //rol de administrador
                 
                 if( SellerName != undefined){
-                    terms += ` AND rpt3_seller RLIKE "` + SellerName + `"`;
-  
+                    let sellerName_ ='';
+                    let vendors_ = []
+                    let idSupervisor = ''
+                    let arrayVendors = SellerName.split('|'); 
+                    for (let index = 0; index < arrayVendors.length; index++) {
+                        if(arrayVendors[index].substr(0,1) === '_'){
+                            idSupervisor = arrayVendors[index].substr(1)
+                            vendors_ = await pool.query(`select usr_name as usrName, usr_last_name as usrLastName
+                            from users where usr_id_supervisor = '${idSupervisor}' and usr_status = 0`)                    
+                            
+                        }else{
+                            sellerName_+= `${arrayVendors[index]}|`
+                        }
+                        if(vendors_.length !== 0){
+                            vendors_.forEach(x => {
+                                sellerName_+= `${x.usrName} ${x.usrLastName}|`
+                            })
+                        }
+                    }                    
+                    sellerName_ = sellerName_.slice(0, -1);
+                    terms += ` AND rpt3_seller RLIKE "` + sellerName_ + `"`;  
                   }else{
                       const vendors = await pool.query(`SELECT usr_code_seller FROM copyoic.users where usr_rol = '3'`)                    
                       if(vendors.length !== 0){
@@ -402,11 +440,30 @@ module.exports = {
                 }                
             }
 
-            if (Rol == '1'){              //rol de vendedor
+            if (Rol == '1' || Rol == '4'){              //rol de vendedor
                 
                 if( SellerName != undefined){
-                    terms += ` AND rpt4_seller RLIKE "` + SellerName + `"`;
-  
+                    let sellerName_ ='';
+                    let vendors_ = []
+                    let idSupervisor = ''
+                    let arrayVendors = SellerName.split('|'); 
+                    for (let index = 0; index < arrayVendors.length; index++) {
+                        if(arrayVendors[index].substr(0,1) === '_'){
+                            idSupervisor = arrayVendors[index].substr(1)
+                            vendors_ = await pool.query(`select usr_name as usrName, usr_last_name as usrLastName
+                            from users where usr_id_supervisor = '${idSupervisor}' and usr_status = 0`)                    
+                            
+                        }else{
+                            sellerName_+= `${arrayVendors[index]}|`
+                        }
+                        if(vendors_.length !== 0){
+                            vendors_.forEach(x => {
+                                sellerName_+= `${x.usrName} ${x.usrLastName}|`
+                            })
+                        }
+                    }                    
+                    sellerName_ = sellerName_.slice(0, -1);
+                    terms += ` AND rpt4_seller RLIKE "` + sellerName_ + `"`;  
                   }else{
                       const vendors = await pool.query(`SELECT usr_code_seller FROM copyoic.users where usr_rol = '3'`)                    
                       if(vendors.length !== 0){
