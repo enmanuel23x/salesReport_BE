@@ -222,12 +222,19 @@ module.exports = {
 
         try {
 
-            let query = `SELECT rpt3_client_code, rpt3_group,
-            sum(CONVERT(SUBSTRING_INDEX(rpt3_avg_sales,'-',-1),UNSIGNED INTEGER)) AS num  
-                        FROM copyoic.report_3 
-                        WHERE rpt3_group IS NOT NULL
-                        group by rpt3_client_code
-                        order by sum(CONVERT(SUBSTRING_INDEX(rpt3_avg_sales,'-',-1),UNSIGNED INTEGER)) desc limit 20`
+            let query = `SELECT 
+            rpt3_client_code, 
+            rpt3_group,
+           sum(CONVERT(SUBSTRING_INDEX(rpt3_avg_sales,'-',-1),UNSIGNED INTEGER)) AS num  
+        FROM 
+            copyoic.report_3 
+        WHERE 
+            rpt3_group IS NOT NULL
+        group BY 
+            rpt3_client_code,
+            rpt3_group
+        order BY 
+            num desc limit 20`
             
                                    
 
@@ -352,14 +359,13 @@ module.exports = {
                         rpt3_group IS NOT NULL
                         ${terms} 
                         and rpt3_client_code = '${Clients[index].rpt3_client_code}'
-                        order by CAST(rpt3_avg_sales AS DECIMAL(10,2)) desc limit 10) as report_3) b
+                        order by CAST(rpt3_avg_sales AS DECIMAL(10,2)) desc limit 10) as report_3 GROUP BY rpt3_client_code) b
                         on a.rpt3_client_code = b.rpt3_client_code_b 
                         where 
                         rpt3_group IS NOT NULL
                         ${terms} 
                         and rpt3_client_code = '${Clients[index].rpt3_client_code}'
                         order by CAST(rpt3_avg_sales AS DECIMAL(10,2)) desc limit 10 `
-
                      const Result = await pool.query(query)
                     if(Result.length !== 0){
                         for (let index1 = 0; index1 < Result.length; index1++) {
@@ -386,7 +392,7 @@ module.exports = {
             let query = `SELECT rpt4_client_code, rpt4_group,sum(CONVERT(SUBSTRING_INDEX(rpt4_avg_sales,'-',-1),UNSIGNED INTEGER)) AS num  
             FROM copyoic.report_4 
             WHERE rpt4_group IS NOT NULL
-            group by rpt4_client_code
+            group by rpt4_client_code, rpt4_group
             order by sum(CONVERT(SUBSTRING_INDEX(rpt4_avg_sales,'-',-1),UNSIGNED INTEGER)) desc limit 20`
 
             
@@ -510,13 +516,14 @@ module.exports = {
                         rpt4_group IS NOT NULL 
                         ${terms} 
                         and rpt4_client_code = '${Clients[index].rpt4_client_code}'
-                        order by CAST(rpt4_avg_sales AS DECIMAL(10,2)) desc limit 15) as report_4) b
+                        order by CAST(rpt4_avg_sales AS DECIMAL(10,2)) desc limit 15) as report_4 GROUP BY rpt4_client_code) b
                         on a.rpt4_client_code = b.rpt4_client_code_b 
                         where 
                         rpt4_group IS NOT NULL
                         ${terms} 
                         and rpt4_client_code = '${Clients[index].rpt4_client_code}'
                         order by CAST(rpt4_avg_sales AS DECIMAL(10,2)) desc limit 15 `
+                        console.log(query)
                      const Result = await pool.query(query)
                     if(Result.length !== 0){
                         for (let index1 = 0; index1 < Result.length; index1++) {
