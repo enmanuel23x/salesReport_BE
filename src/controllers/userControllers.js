@@ -27,22 +27,41 @@ module.exports = {
     },
     async getAllUserFilterCollaborator (req, res, next) {
         try {
-            const result = await pool.query('SELECT * FROM users where usr_rol != "4"')
-            res.json(result.map( el => {
-                return {
-                    usrId: el.usr_id,
-                    usrName: el.usr_name,
-                    usrLastName: el.usr_last_name,
-                    usrEmail: el.usr_email,
-                    usrRol: el.usr_rol,
-                    usrStatus: el.usr_status,
-                    cliId: el.cli_id,
-                    cliName: el.cli_name,
-                    usrSellerCode:el.usr_code_seller,
-                    usrIdSupervisor:el.usr_id_supervisor,
-                    usrTeleventa: el.usr_televenta
-                }
-            }))
+
+            const supervisors = await pool.query(`SELECT usr_id as usrId,
+            usr_name as usrName,
+            usr_last_name as usrLastName,
+            usr_email as usrEmail,
+            usr_rol as usrRol,
+            usr_status as usrStatus,
+            cli_id as cliId,
+            usr_code_seller as usrSellerCode,
+            usr_id_supervisor as usrIdSupervisor,
+            usr_televenta as usrTeleventa
+             FROM users where usr_rol = "2" and usr_status = "0"`)
+            let result_ = [];
+            for (let index = 0; index < supervisors.length; index++) {
+
+                const vendors = await pool.query(`SELECT usr_id as usrId,
+                usr_name as usrName,
+                usr_last_name as usrLastName,
+                usr_email as usrEmail,
+                usr_rol as usrRol,
+                usr_status as usrStatus,
+                cli_id as cliId,
+                usr_code_seller as usrSellerCode,
+                usr_id_supervisor as usrIdSupervisor,
+                usr_televenta as usrTeleventa
+                 FROM users where usr_rol = "3" and usr_status = "0" and usr_id_supervisor = "${supervisors[index].usrId}"`)
+                
+                result_.push({
+                    supervisor: supervisors[index], 
+                    vendors: vendors,                     
+                })                
+
+            }
+            res.json(result_)
+
         } catch (error) {
             console.error(error)
             res.send("ERROR")
