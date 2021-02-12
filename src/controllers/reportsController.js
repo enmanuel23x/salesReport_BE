@@ -523,7 +523,6 @@ module.exports = {
                         ${terms} 
                         and rpt4_client_code = '${Clients[index].rpt4_client_code}'
                         order by CAST(rpt4_avg_sales AS DECIMAL(10,2)) desc limit 15 `
-                        console.log(query)
                      const Result = await pool.query(query)
                     if(Result.length !== 0){
                         for (let index1 = 0; index1 < Result.length; index1++) {
@@ -627,44 +626,69 @@ module.exports = {
         try {
             const { UsrId } = req.body;
             const vendors = await pool.query(`SELECT usr_code_seller FROM copyoic.users where usr_id_supervisor = '${UsrId}'  AND usr_code_seller IS NOT NULL`);
-            const usr_code_seller = await pool.query(`SELECT usr_code_seller FROM copyoic.users where usr_id = '${UsrId}'`);
+            const usrData = await pool.query(`SELECT * FROM copyoic.users where usr_id = '${UsrId}'`);
             let result, SellersCodes = '';
-            if(SellersCodes == ''){
-                SellersCodes = usr_code_seller[0].usr_code_seller
-            }                    
-            if(vendors.length !== 0){
-                for (let index = 0; index < vendors.length; index++) {
-                    if(SellersCodes == ''){
-                        SellersCodes = vendors[index].usr_code_seller
-                    }else{
-                        SellersCodes += '|'+vendors[index].usr_code_seller
+            if(usrData[0].usr_rol == 1){
+                result = await pool.query(`
+                SELECT 
+                clients.rpt5_client_code,
+                clients.rpt5_group
+            FROM (
+                SELECT 
+                    rpt5_client_code,
+                    rpt5_group,
+                    (SUM(rpt5_vtaCantidad_1) + SUM(rpt5_vtaCantidad_2) + SUM(rpt5_vtaCantidad_3) + SUM(rpt5_vtaCantidad_4)) AS suma
+                FROM 
+                    report_5
+                GROUP BY 
+                    rpt5_client_code,
+                    rpt5_group
+                ORDER BY 
+                    suma DESC
+                LIMIT 20
+                ) AS clients
+            ORDER BY 
+                suma ASC
+            LIMIT 5
+            `)
+            }else{
+                if(usrData[0].usr_code_seller){
+                    SellersCodes = usrData[0].usr_code_seller
+                }                    
+                if(vendors.length !== 0){
+                    for (let index = 0; index < vendors.length; index++) {
+                        if(SellersCodes == ''){
+                            SellersCodes = vendors[index].usr_code_seller
+                        }else{
+                            SellersCodes += '|'+vendors[index].usr_code_seller
+                        }
                     }
                 }
-            }
-            result = await pool.query(`
-            SELECT 
-            clients.rpt5_client_code,
-            clients.rpt5_group
-        FROM (
-            SELECT 
-                rpt5_client_code,
-                rpt5_group,
-                (SUM(rpt5_vtaCantidad_1) + SUM(rpt5_vtaCantidad_2) + SUM(rpt5_vtaCantidad_3) + SUM(rpt5_vtaCantidad_4)) AS suma
-            FROM 
-                report_5
-            WHERE
-                report_5.rpt5_seller_code RLIKE '${SellersCodes}'
-            GROUP BY 
-                rpt5_client_code,
-                rpt5_group
+                result = await pool.query(`
+                SELECT 
+                clients.rpt5_client_code,
+                clients.rpt5_group
+            FROM (
+                SELECT 
+                    rpt5_client_code,
+                    rpt5_group,
+                    (SUM(rpt5_vtaCantidad_1) + SUM(rpt5_vtaCantidad_2) + SUM(rpt5_vtaCantidad_3) + SUM(rpt5_vtaCantidad_4)) AS suma
+                FROM 
+                    report_5
+                WHERE
+                    report_5.rpt5_seller_code RLIKE '${SellersCodes}'
+                GROUP BY 
+                    rpt5_client_code,
+                    rpt5_group
+                ORDER BY 
+                    suma DESC
+                LIMIT 20
+                ) AS clients
             ORDER BY 
-                suma DESC
-            LIMIT 20
-            ) AS clients
-        ORDER BY 
-            suma ASC
-        LIMIT 5
-        `)   
+                suma ASC
+            LIMIT 5
+            `)
+            }   
                
             res.json(result)
         } catch (error) {
