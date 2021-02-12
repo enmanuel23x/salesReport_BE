@@ -4,7 +4,7 @@ const pool = require('../../database/conn/database');
 module.exports = {
 
     async get_report_1 (req, res, next) {
-     
+        
         try {
             
             const { ABC, SellerActive, SellerName, Rol, SellerCode,UsrId } = req.body;
@@ -29,6 +29,8 @@ module.exports = {
                     terms += ` AND rpt1_seller RLIKE "` + SellerName + `"`;
 
                 }else{
+                    
+
                     const vendors = await pool.query(`SELECT usr_code_seller FROM copyoic.users where usr_id_supervisor = '${UsrId}'`)                    
                     if(vendors.length !== 0){
                         data += `(`
@@ -47,11 +49,32 @@ module.exports = {
                 }                
             }
 
-            if (Rol == '1'){              //rol de administrador
+            if (Rol == '1' || Rol == '4'){              //rol de administrador y desarrollador
                 
                 if( SellerName != undefined){
-                    terms += ` AND rpt1_seller RLIKE "` + SellerName + `"`;  
+                    let sellerName_ ='';
+                    let vendors_ = []
+                    let idSupervisor = ''
+                    let arrayVendors = SellerName.split('|'); 
+                    for (let index = 0; index < arrayVendors.length; index++) {
+                        if(arrayVendors[index].substr(0,1) === '_'){
+                            idSupervisor = arrayVendors[index].substr(1)
+                            vendors_ = await pool.query(`select usr_name as usrName, usr_last_name as usrLastName
+                            from users where usr_id_supervisor = '${idSupervisor}' and usr_status = 0`)                    
+                            
+                        }else{
+                            sellerName_+= `${arrayVendors[index]}|`
+                        }
+                        if(vendors_.length !== 0){
+                            vendors_.forEach(x => {
+                                sellerName_+= `${x.usrName} ${x.usrLastName}|`
+                            })
+                        }
+                    }                    
+                    sellerName_ = sellerName_.slice(0, -1);
+                    terms += ` AND rpt1_seller RLIKE "` + sellerName_ + `"`;  
                   }else{
+
                       const vendors = await pool.query(`SELECT usr_code_seller FROM copyoic.users where usr_rol = '3'`)                    
                       if(vendors.length !== 0){
                           data += `(`
@@ -135,11 +158,30 @@ module.exports = {
                 }                
             }
 
-            if (Rol == '1'){              //rol de administrador
+            if (Rol == '1' || Rol == '4'){              //rol de administrador y desarrollador
                 
                 if( SellerName != undefined){
-                    terms += ` AND rpt2_seller RLIKE "` + SellerName + `"`;
-  
+                    let sellerName_ ='';
+                    let vendors_ = []
+                    let idSupervisor = ''
+                    let arrayVendors = SellerName.split('|'); 
+                    for (let index = 0; index < arrayVendors.length; index++) {
+                        if(arrayVendors[index].substr(0,1) === '_'){
+                            idSupervisor = arrayVendors[index].substr(1)
+                            vendors_ = await pool.query(`select usr_name as usrName, usr_last_name as usrLastName
+                            from users where usr_id_supervisor = '${idSupervisor}' and usr_status = 0`)                    
+                            
+                        }else{
+                            sellerName_+= `${arrayVendors[index]}|`
+                        }
+                        if(vendors_.length !== 0){
+                            vendors_.forEach(x => {
+                                sellerName_+= `${x.usrName} ${x.usrLastName}|`
+                            })
+                        }
+                    }                    
+                    sellerName_ = sellerName_.slice(0, -1);
+                    terms += ` AND rpt2_seller RLIKE "` + sellerName_ + `"`;  
                   }else{
                       const vendors = await pool.query(`SELECT usr_code_seller FROM copyoic.users where usr_rol = '3'`)                    
                       if(vendors.length !== 0){
@@ -180,12 +222,19 @@ module.exports = {
 
         try {
 
-            let query = `SELECT rpt3_client_code, rpt3_group,
-            sum(CONVERT(SUBSTRING_INDEX(rpt3_avg_sales,'-',-1),UNSIGNED INTEGER)) AS num  
-                        FROM copyoic.report_3 
-                        WHERE rpt3_group IS NOT NULL
-                        group by rpt3_client_code
-                        order by sum(CONVERT(SUBSTRING_INDEX(rpt3_avg_sales,'-',-1),UNSIGNED INTEGER)) desc limit 20`
+            let query = `SELECT 
+            rpt3_client_code, 
+            rpt3_group,
+           sum(CONVERT(SUBSTRING_INDEX(rpt3_avg_sales,'-',-1),UNSIGNED INTEGER)) AS num  
+        FROM 
+            copyoic.report_3 
+        WHERE 
+            rpt3_group IS NOT NULL
+        group BY 
+            rpt3_client_code,
+            rpt3_group
+        order BY 
+            num desc limit 20`
             
                                    
 
@@ -241,11 +290,30 @@ module.exports = {
                 }                
             }
 
-            if (Rol == '1'){              //rol de administrador
+            if (Rol == '1' || Rol == '4'){              //rol de administrador
                 
                 if( SellerName != undefined){
-                    terms += ` AND rpt3_seller RLIKE "` + SellerName + `"`;
-  
+                    let sellerName_ ='';
+                    let vendors_ = []
+                    let idSupervisor = ''
+                    let arrayVendors = SellerName.split('|'); 
+                    for (let index = 0; index < arrayVendors.length; index++) {
+                        if(arrayVendors[index].substr(0,1) === '_'){
+                            idSupervisor = arrayVendors[index].substr(1)
+                            vendors_ = await pool.query(`select usr_name as usrName, usr_last_name as usrLastName
+                            from users where usr_id_supervisor = '${idSupervisor}' and usr_status = 0`)                    
+                            
+                        }else{
+                            sellerName_+= `${arrayVendors[index]}|`
+                        }
+                        if(vendors_.length !== 0){
+                            vendors_.forEach(x => {
+                                sellerName_+= `${x.usrName} ${x.usrLastName}|`
+                            })
+                        }
+                    }                    
+                    sellerName_ = sellerName_.slice(0, -1);
+                    terms += ` AND rpt3_seller RLIKE "` + sellerName_ + `"`;  
                   }else{
                       const vendors = await pool.query(`SELECT usr_code_seller FROM copyoic.users where usr_rol = '3'`)                    
                       if(vendors.length !== 0){
@@ -291,14 +359,13 @@ module.exports = {
                         rpt3_group IS NOT NULL
                         ${terms} 
                         and rpt3_client_code = '${Clients[index].rpt3_client_code}'
-                        order by CAST(rpt3_avg_sales AS DECIMAL(10,2)) desc limit 10) as report_3) b
+                        order by CAST(rpt3_avg_sales AS DECIMAL(10,2)) desc limit 10) as report_3 GROUP BY rpt3_client_code) b
                         on a.rpt3_client_code = b.rpt3_client_code_b 
                         where 
                         rpt3_group IS NOT NULL
                         ${terms} 
                         and rpt3_client_code = '${Clients[index].rpt3_client_code}'
                         order by CAST(rpt3_avg_sales AS DECIMAL(10,2)) desc limit 10 `
-
                      const Result = await pool.query(query)
                     if(Result.length !== 0){
                         for (let index1 = 0; index1 < Result.length; index1++) {
@@ -325,7 +392,7 @@ module.exports = {
             let query = `SELECT rpt4_client_code, rpt4_group,sum(CONVERT(SUBSTRING_INDEX(rpt4_avg_sales,'-',-1),UNSIGNED INTEGER)) AS num  
             FROM copyoic.report_4 
             WHERE rpt4_group IS NOT NULL
-            group by rpt4_client_code
+            group by rpt4_client_code, rpt4_group
             order by sum(CONVERT(SUBSTRING_INDEX(rpt4_avg_sales,'-',-1),UNSIGNED INTEGER)) desc limit 20`
 
             
@@ -379,11 +446,30 @@ module.exports = {
                 }                
             }
 
-            if (Rol == '1'){              //rol de vendedor
+            if (Rol == '1' || Rol == '4'){              //rol de vendedor
                 
                 if( SellerName != undefined){
-                    terms += ` AND rpt4_seller RLIKE "` + SellerName + `"`;
-  
+                    let sellerName_ ='';
+                    let vendors_ = []
+                    let idSupervisor = ''
+                    let arrayVendors = SellerName.split('|'); 
+                    for (let index = 0; index < arrayVendors.length; index++) {
+                        if(arrayVendors[index].substr(0,1) === '_'){
+                            idSupervisor = arrayVendors[index].substr(1)
+                            vendors_ = await pool.query(`select usr_name as usrName, usr_last_name as usrLastName
+                            from users where usr_id_supervisor = '${idSupervisor}' and usr_status = 0`)                    
+                            
+                        }else{
+                            sellerName_+= `${arrayVendors[index]}|`
+                        }
+                        if(vendors_.length !== 0){
+                            vendors_.forEach(x => {
+                                sellerName_+= `${x.usrName} ${x.usrLastName}|`
+                            })
+                        }
+                    }                    
+                    sellerName_ = sellerName_.slice(0, -1);
+                    terms += ` AND rpt4_seller RLIKE "` + sellerName_ + `"`;  
                   }else{
                       const vendors = await pool.query(`SELECT usr_code_seller FROM copyoic.users where usr_rol = '3'`)                    
                       if(vendors.length !== 0){
@@ -430,7 +516,7 @@ module.exports = {
                         rpt4_group IS NOT NULL 
                         ${terms} 
                         and rpt4_client_code = '${Clients[index].rpt4_client_code}'
-                        order by CAST(rpt4_avg_sales AS DECIMAL(10,2)) desc limit 15) as report_4) b
+                        order by CAST(rpt4_avg_sales AS DECIMAL(10,2)) desc limit 15) as report_4 GROUP BY rpt4_client_code) b
                         on a.rpt4_client_code = b.rpt4_client_code_b 
                         where 
                         rpt4_group IS NOT NULL
@@ -540,44 +626,69 @@ module.exports = {
         try {
             const { UsrId } = req.body;
             const vendors = await pool.query(`SELECT usr_code_seller FROM copyoic.users where usr_id_supervisor = '${UsrId}'  AND usr_code_seller IS NOT NULL`);
-            const usr_code_seller = await pool.query(`SELECT usr_code_seller FROM copyoic.users where usr_id = '${UsrId}'`);
+            const usrData = await pool.query(`SELECT * FROM copyoic.users where usr_id = '${UsrId}'`);
             let result, SellersCodes = '';
-            if(SellersCodes == ''){
-                SellersCodes = usr_code_seller[0].usr_code_seller
-            }                    
-            if(vendors.length !== 0){
-                for (let index = 0; index < vendors.length; index++) {
-                    if(SellersCodes == ''){
-                        SellersCodes = vendors[index].usr_code_seller
-                    }else{
-                        SellersCodes += '|'+vendors[index].usr_code_seller
+            if(usrData[0].usr_rol == 1){
+                result = await pool.query(`
+                SELECT 
+                clients.rpt5_client_code,
+                clients.rpt5_group
+            FROM (
+                SELECT 
+                    rpt5_client_code,
+                    rpt5_group,
+                    (SUM(rpt5_vtaCantidad_1) + SUM(rpt5_vtaCantidad_2) + SUM(rpt5_vtaCantidad_3) + SUM(rpt5_vtaCantidad_4)) AS suma
+                FROM 
+                    report_5
+                GROUP BY 
+                    rpt5_client_code,
+                    rpt5_group
+                ORDER BY 
+                    suma DESC
+                LIMIT 20
+                ) AS clients
+            ORDER BY 
+                suma ASC
+            LIMIT 5
+            `)
+            }else{
+                if(usrData[0].usr_code_seller){
+                    SellersCodes = usrData[0].usr_code_seller
+                }                    
+                if(vendors.length !== 0){
+                    for (let index = 0; index < vendors.length; index++) {
+                        if(SellersCodes == ''){
+                            SellersCodes = vendors[index].usr_code_seller
+                        }else{
+                            SellersCodes += '|'+vendors[index].usr_code_seller
+                        }
                     }
                 }
-            }
-            result = await pool.query(`
-            SELECT 
-            clients.rpt5_client_code,
-            clients.rpt5_group
-        FROM (
-            SELECT 
-                rpt5_client_code,
-                rpt5_group,
-                (SUM(rpt5_vtaCantidad_1) + SUM(rpt5_vtaCantidad_2) + SUM(rpt5_vtaCantidad_3) + SUM(rpt5_vtaCantidad_4)) AS suma
-            FROM 
-                report_5
-            WHERE
-                report_5.rpt5_seller_code RLIKE '${SellersCodes}'
-            GROUP BY 
-                rpt5_client_code,
-                rpt5_group
+                result = await pool.query(`
+                SELECT 
+                clients.rpt5_client_code,
+                clients.rpt5_group
+            FROM (
+                SELECT 
+                    rpt5_client_code,
+                    rpt5_group,
+                    (SUM(rpt5_vtaCantidad_1) + SUM(rpt5_vtaCantidad_2) + SUM(rpt5_vtaCantidad_3) + SUM(rpt5_vtaCantidad_4)) AS suma
+                FROM 
+                    report_5
+                WHERE
+                    report_5.rpt5_seller_code RLIKE '${SellersCodes}'
+                GROUP BY 
+                    rpt5_client_code,
+                    rpt5_group
+                ORDER BY 
+                    suma DESC
+                LIMIT 20
+                ) AS clients
             ORDER BY 
-                suma DESC
-            LIMIT 20
-            ) AS clients
-        ORDER BY 
-            suma ASC
-        LIMIT 5
-        `)   
+                suma ASC
+            LIMIT 5
+            `)
+            }   
                
             res.json(result)
         } catch (error) {
