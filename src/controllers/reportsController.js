@@ -107,8 +107,8 @@ module.exports = {
             if(terms != ''){
                 query += ` WHERE rpt1_group IS NOT NULL ${terms} `
             }
-            query += ` order by ROUND(CAST(rpt1_avg_sales AS DECIMAL(10,2))) desc`
-            const result = await pool.query(query)            
+            query += ` order by rpt1_abc, ROUND(CAST(rpt1_avg_sales AS DECIMAL(10,2))) desc limit 10`
+            const result = await pool.query(query)          
             res.json(result)            
         } catch (error) {
             console.error(error)

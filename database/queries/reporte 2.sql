@@ -70,6 +70,6 @@ LEFT JOIN
 		base.agr IS NOT NULL
 		AND 
 		ROUND(( semana.sumvtas*100 / NULLIF(((base.promvtas / hbl.days)*5) , 0) ),2) <= 70
-	GROUP BY base.agr, base.promvtas, semana.sumvtas
+	GROUP BY base.agr, base.promvtas, semana.sumvtas, hbl.days, vendedor.COD, vendedor.NOMBRE, vendedor.ACTIVO
 	ORDER BY cli.RAZON_SOCIAL
 	;
