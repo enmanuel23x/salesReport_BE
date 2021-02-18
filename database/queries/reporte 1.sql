@@ -66,6 +66,6 @@ WHERE
 	base.agr IS NOT NULL
 	AND
 	base.alc <= 0.7
-GROUP by base.agr, base.promvtas, base.lastmonth, base.alc
+GROUP by base.agr, base.promvtas, base.lastmonth, base.alc, vendedor.COD, vendedor.NOMBRE, vendedor.ACTIVO
 ORDER BY cli.RAZON_SOCIAL
 ;

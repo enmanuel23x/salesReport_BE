@@ -26,7 +26,7 @@ module.exports = {
             if (Rol == '2'){              //rol de supervisor
                     
                 if( SellerName != undefined){
-                    terms += ` AND rpt1_seller RLIKE "` + SellerName + `"`;
+                    terms += ` AND rpt1_seller_code RLIKE "` + SellerName + `"`;
 
                 }else{
                     
@@ -72,7 +72,7 @@ module.exports = {
                         }
                     }                    
                     sellerName_ = sellerName_.slice(0, -1);
-                    terms += ` AND rpt1_seller RLIKE "` + sellerName_ + `"`;  
+                    terms += ` AND rpt1_seller_code RLIKE "` + sellerName_ + `"`;  
                   }else{
 
                       const vendors = await pool.query(`SELECT usr_code_seller FROM copyoic.users where usr_rol = '3'`)                    
@@ -107,8 +107,8 @@ module.exports = {
             if(terms != ''){
                 query += ` WHERE rpt1_group IS NOT NULL ${terms} `
             }
-            query += ` order by ROUND(CAST(rpt1_avg_sales AS DECIMAL(10,2))) desc`
-            const result = await pool.query(query)            
+            query += ` order by rpt1_abc, ROUND(CAST(rpt1_avg_sales AS DECIMAL(10,2))) desc limit 10`
+            const result = await pool.query(query)          
             res.json(result)            
         } catch (error) {
             console.error(error)
@@ -137,7 +137,7 @@ module.exports = {
             if (Rol == '2'){              //rol de supervisor
                     
                 if( SellerName != undefined){
-                    terms += ` AND rpt2_seller RLIKE "` + SellerName + `"`;
+                    terms += ` AND rpt2_seller_code RLIKE "` + SellerName + `"`;
 
                 }else{
                     const vendors = await pool.query(`SELECT usr_code_seller FROM copyoic.users where usr_id_supervisor = '${UsrId}'`)                    
@@ -181,7 +181,7 @@ module.exports = {
                         }
                     }                    
                     sellerName_ = sellerName_.slice(0, -1);
-                    terms += ` AND rpt2_seller RLIKE "` + sellerName_ + `"`;  
+                    terms += ` AND rpt2_seller_code RLIKE "` + sellerName_ + `"`;  
                   }else{
                       const vendors = await pool.query(`SELECT usr_code_seller FROM copyoic.users where usr_rol = '3'`)                    
                       if(vendors.length !== 0){
@@ -221,7 +221,7 @@ module.exports = {
     async get_report_3_top20_clients (req, res, next) {
 
         try {
-
+            const { SellerName, SellerCode } = req.body
             let query = `SELECT 
             rpt3_client_code, 
             rpt3_group,
@@ -230,15 +230,15 @@ module.exports = {
             copyoic.report_3 
         WHERE 
             rpt3_group IS NOT NULL
+            AND
+            ${SellerName != undefined ? '(rpt3_seller_code = "'+SellerCode+'" OR rpt3_seller_code RLIKE "'+SellerName+'")' : 'rpt3_seller_code = '+SellerCode}
         group BY 
             rpt3_client_code,
             rpt3_group
         order BY 
             num desc limit 20`
-            
-                                   
-
             const result = await pool.query(query)
+            
             res.json(result)
         } catch (error) {
             console.error(error)
@@ -269,7 +269,7 @@ module.exports = {
             if (Rol == '2'){              //rol de supervisor
                     
                 if( SellerName != undefined){
-                    terms += ` AND rpt3_seller RLIKE "` + SellerName + `"`;
+                    terms += SellerName != undefined ? 'AND (rpt3_seller_code = "'+SellerCode+'" OR rpt3_seller_code RLIKE "'+SellerName+'")' : 'AND rpt3_seller_code = '+SellerCode
 
                 }else{
                     const vendors = await pool.query(`SELECT usr_code_seller FROM copyoic.users where usr_id_supervisor = '${UsrId}'`)                    
@@ -388,10 +388,12 @@ module.exports = {
     async get_report_4_top20_clients (req, res, next) {
 
         try { 
-            
+            const { SellerName, SellerCode } = req.body
             let query = `SELECT rpt4_client_code, rpt4_group,sum(CONVERT(SUBSTRING_INDEX(rpt4_avg_sales,'-',-1),UNSIGNED INTEGER)) AS num  
             FROM copyoic.report_4 
             WHERE rpt4_group IS NOT NULL
+            AND
+            ${SellerName != undefined ? '(rpt4_seller_code = "'+SellerCode+'" OR rpt4_seller_code RLIKE "'+SellerName+'")' : 'rpt4_seller_code = '+SellerCode}
             group by rpt4_client_code, rpt4_group
             order by sum(CONVERT(SUBSTRING_INDEX(rpt4_avg_sales,'-',-1),UNSIGNED INTEGER)) desc limit 20`
 
@@ -425,7 +427,7 @@ module.exports = {
             if (Rol == '2'){              //rol de supervisor
                     
                 if( SellerName != undefined){
-                    terms += ` AND rpt4_seller RLIKE "` + SellerName + `"`;
+                    terms += SellerName != undefined ? 'AND (rpt4_seller_code = "'+SellerCode+'" OR rpt4_seller_code RLIKE "'+SellerName+'")' : 'AND rpt4_seller_code = '+SellerCode
 
                 }else{
                     const vendors = await pool.query(`SELECT usr_code_seller FROM copyoic.users where usr_id_supervisor = '${UsrId}'`)                    
@@ -550,7 +552,7 @@ module.exports = {
             for (let index = 0; index < classification.length; index++) {
                 request = await pool.query(`SELECT 
                                                 *,
-                                                DATE_ADD(rpt5_date, INTERVAL 1 DAY) AS rpt5_date
+                                                DATE_ADD(rpt5_date, INTERVAL 2 DAY) AS rpt5_date
                                             FROM 
                                                 report_5
                                             WHERE 
