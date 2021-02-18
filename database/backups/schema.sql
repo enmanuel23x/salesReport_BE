@@ -166,5 +166,5 @@ CREATE TABLE IF NOT EXISTS `copyoic`.`report_5` (
   `rpt5_vtaCantidad_4` varchar(256) DEFAULT NULL,
   `rpt5_seller_code` varchar(256) DEFAULT NULL,
   `rpt5_seller` varchar(256) DEFAULT NULL,
-  `rpt5_date` varchar(256) DEFAULT NULL
+  `rpt5_date` date DEFAULT NULL
 );

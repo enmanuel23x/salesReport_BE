@@ -552,7 +552,7 @@ module.exports = {
             for (let index = 0; index < classification.length; index++) {
                 request = await pool.query(`SELECT 
                                                 *,
-                                                DATE_ADD(rpt5_date, INTERVAL 1 DAY) AS rpt5_date
+                                                DATE_ADD(rpt5_date, INTERVAL 2 DAY) AS rpt5_date
                                             FROM 
                                                 report_5
                                             WHERE 
