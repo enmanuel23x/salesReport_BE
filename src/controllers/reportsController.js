@@ -7,16 +7,13 @@ module.exports = {
         
         try {
             
-            const { ABC, SellerActive, SellerName, Rol, SellerCode,UsrId } = req.body;
+            const { ABC, SellerName, Rol, SellerCode,UsrId } = req.body;
             let data='';
 
             let terms ='';
             let query = ''
             dataresp=[]
             
-            if( SellerActive != undefined){
-                terms += ` AND rpt1_seller_active = "` + SellerActive + `"`;
-            } 
             if( ABC != undefined){
                 terms += ` AND rpt1_abc RLIKE "` + ABC + `"`;
             }
@@ -119,7 +116,7 @@ module.exports = {
 
         try {
 
-            const {Month, ABC, SellerActive, SellerName, Rol, SellerCode,UsrId } = req.body;
+            const {Month, ABC, SellerName, Rol, SellerCode,UsrId } = req.body;
             let data='';
 
             let terms ='';
@@ -128,9 +125,6 @@ module.exports = {
             
             terms += `WHERE rpt2_group IS NOT NULL `
 
-            if( SellerActive != undefined){
-                terms += ` AND rpt2_seller_active = "` + SellerActive + `"`;
-            }
             if (Rol == '3'){              //rol de vendedor
                 terms += ` AND rpt2_seller_code = "` + SellerCode + `"`;
             }
@@ -807,6 +801,40 @@ module.exports = {
         UNION
             SELECT  Date_format( DATE_SUB(base.rpt5_date,INTERVAL '4' MONTH), '%m-%d-%Y') as month FROM (SELECT rpt5_date FROM report_5 LIMIT 1) AS base
             `)       
+            res.json(result)
+        } catch (error) {
+            console.error(error)
+            res.send("ERROR")
+        }
+    },
+    async get_report_date (req, res, next) {
+ 
+        try {
+            const rpt_date = req.params.rpt_date;
+            let tmp = { field: 'rpt1_date', table: 'report_1' }
+            switch (String(rpt_date)) {
+                case "1":
+                    tmp = { field: 'rpt1_date', table: 'report_1' }
+                    break;
+                case "2":
+                    tmp = { field: 'rpt2_date', table: 'report_2' }
+                    break;
+                case "3":
+                    tmp = { field: 'rpt3_date', table: 'report_3' }
+                    break;
+                case "4":
+                    tmp = { field: 'rpt4_date', table: 'report_4' }
+                    break;
+                case "5":
+                    tmp = { field: 'rpt5_date', table: 'report_5' }
+                    break;
+            }
+            const result = await pool.query(`
+                SELECT 
+                    DATE_ADD(${tmp.field} , INTERVAL 2 DAY) AS ${tmp.field} 
+                FROM 
+                    ${tmp.table} 
+                LIMIT 1`)       
             res.json(result)
         } catch (error) {
             console.error(error)
