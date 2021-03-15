@@ -15,7 +15,7 @@ module.exports = {
                     usrStatus: el.usr_status,
                     cliId: el.cli_id,
                     cliName: el.cli_name,
-                    usrSellerCode:el.usr_seller_code,
+                    usrSellerCode:el.usr_code_seller,
                     usrIdSupervisor:el.usr_id_supervisor,
                     usrTeleventa: el.usr_televenta
                 }
@@ -81,7 +81,7 @@ module.exports = {
                 usrStatus: result[0].usr_status,
                 cliId: result[0].cli_id,
                 cliName: result[0].cli_name,
-                usrSellerCode:result[0].usr_seller_code,
+                usrSellerCode:result[0].usr_code_seller,
                 usrIdSupervisor:result[0].usr_id_supervisor,
                 usrTeleventa: result[0].usr_televenta
             });
@@ -182,16 +182,27 @@ module.exports = {
     },
     async addUsers(req, res, next) {
         try {
+            console.log('rol', req.body.usrRol)
+            let televendedor
+            let idRol
+            if(req.body.usrRol == 4){ 
+                televendedor = 1
+                idRol = 3
+            }else{ 
+                televendedor = 0
+                idRol = req.body.usrRol
+             }
             const result = await pool.query('INSERT INTO users SET ?', 
                 {
                 usr_name: req.body.usrName,
                 usr_last_name: req.body.usrLastName,
                 usr_email: req.body.usrEmail,
-                usr_rol: req.body.usrRol,
+                usr_rol: idRol,
                 usr_status: req.body.usrStatus,
                 cli_id: req.body.cliId,
-                usr_seller_code:req.body.usrSellerCode,
-                usr_id_supervisor:req.body.usrIdSupervisor
+                usr_code_seller:req.body.usrSellerCode,
+                usr_id_supervisor:req.body.usrIdSupervisor,
+                usr_televenta: televendedor
 
                 });
             res.json(result);
@@ -206,6 +217,16 @@ module.exports = {
     async updateUsers(req,res,next) {
         try {
             const usr_id = req.params.id;
+            let televendedor
+            let idRol
+            if(req.body.usrRol == 4){ 
+                televendedor = 1
+                idRol = 3
+            }else{ 
+                televendedor = 0
+                idRol = req.body.usrRol
+             }
+
             let user = await pool.query('SELECT * FROM users WHERE usr_id = ' + usr_id);
             user = user.length == 0 ? { 
                 usr_name: null, 
@@ -214,18 +235,19 @@ module.exports = {
                 usr_rol: null, 
                 usr_status: null, 
                 cli_id: null,
-                usr_seller_code:null,
+                usr_code_seller:null,
                 usr_id_supervisor:null 
             } : user[0]
             const params = {
                 usr_name: (req.body.usrName != null) ? req.body.usrName : user.usr_name,
                 usr_last_name: (req.body.usrLastName != null) ? req.body.usrLastName : user.usr_last_name,
                 usr_email: (req.body.usrEmail != null) ? req.body.usrEmail : user.usr_email,
-                usr_rol: (req.body.usrRol != null) ? req.body.usrRol : user.usr_rol,
+                usr_rol: (req.body.usrRol != null) ? idRol : user.usr_rol,
                 usr_status: (req.body.usrStatus != null) ? req.body.usrStatus : user.usr_status,
                 cli_id: (req.body.cliId != null) ? req.body.cliId : user.cli_id,
-                usr_seller_code: (req.body.usrSellerCode != null) ? req.body.usrSellerCode : user.usr_seller_code,
-                usr_id_supervisor: (req.body.usrIdSupervisor != null) ? req.body.usrIdSupervisor : user.usr_id_supervisor
+                usr_code_seller: (req.body.usrSellerCode != null) ? req.body.usrSellerCode : user.usr_code_seller,
+                usr_id_supervisor: (req.body.usrIdSupervisor != null) ? req.body.usrIdSupervisor : user.usr_id_supervisor,
+                usr_televenta:(req.body.usrRol != null) ? televendedor : user.usr_id_supervisor
 
                 }
             const result = await pool.query(`UPDATE users SET 
