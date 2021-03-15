@@ -12,14 +12,8 @@ FROM
 	cliente_oic AS cli 
 LEFT JOIN 
 		(
-			SELECT 
-	t.agr AS agr, 
-	SUM(t.promvtas) AS promvtas, 
-	t.lastmonth AS lastmonth,  
-	SUM(t.alc) AS alc
-FROM 
-	(SELECT
-	        x.U_Agrupacion AS agr, 
+	 	SELECT
+	        x.NOMBRE AS agr, 
 	        (SUM(x.VTAS) / NULLIF(COUNT( DISTINCT( MONTH(x.FECHA) ) ), 0)  ) AS promvtas,
 	        (SELECT SUM(y.VTAS) 
                 FROM 
@@ -27,9 +21,9 @@ FROM
                 WHERE
 					(y.FECHA BETWEEN (last_day(NOW() - INTERVAL 2 month) + interval 1 DAY) AND last_day(NOW() - INTERVAL 1 month))
          	        AND
-			        y.U_Agrupacion = x.U_Agrupacion
+			        y.NOMBRE = x.NOMBRE
       	        GROUP BY 
-			        y.U_Agrupacion) AS lastmonth,
+			        y.NOMBRE) AS lastmonth,
             (SELECT SUM(z.VTAS) / NULLIF((SUM(x.VTAS) / NULLIF(COUNT( DISTINCT( MONTH(x.FECHA) ) ), 0)  ),0) 
                 FROM 
                     base_oic2 AS z
@@ -37,9 +31,9 @@ FROM
 
                     (z.FECHA BETWEEN (last_day(NOW() - INTERVAL 2 month) + interval 1 DAY) AND last_day(NOW() - INTERVAL 1 month))
 			        AND
-                    z.U_Agrupacion = x.U_Agrupacion
+                    z.NOMBRE = x.NOMBRE
 		        GROUP BY 
-         	        z.U_Agrupacion) AS alc
+         	        z.NOMBRE) AS alc
             FROM 
 	            base_oic2 AS x
             WHERE
@@ -47,11 +41,9 @@ FROM
 	            AND
                 (x.VTAS > 0 OR x.VTAS < 0)
 				AND
-				x.U_Agrupacion IS NOT NULL
+				x.NOMBRE IS NOT NULL
             GROUP BY 
-                x.U_Agrupacion, x.CLIENTE ) AS t
-GROUP BY t.agr, t.lastmonth
-		) AS base
+                x.NOMBRE, x.CLIENTE ) AS base
     ON ( cli.RAZON_SOCIAL = base.agr )
 LEFT JOIN (
 	SELECT 

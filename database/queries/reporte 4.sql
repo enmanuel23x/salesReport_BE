@@ -9,7 +9,7 @@ SELECT
  	vendedor.COD AS 'Codigo Vendedor',
  	vendedor.NOMBRE AS 'Vendedor',
  	base.CLAS AS 'Clasificacion',
-  base.MARCA AS 'Marca',
+	base.MARCA AS 'Marca',
  	NOW() AS 'Date'
 	
 				
@@ -34,8 +34,6 @@ LEFT JOIN
 				(x.CLASIFICACION_5_DES = 'DOBLE BASICO' OR x.CLASIFICACION_5_DES = 'TRIPLE BASICO')
          GROUP BY 
 	        	x.CLIENTE, x.NOMBRE, x.ARTICULO, x.DESCRIPCION, x.CLASIFICACION_5_DES, x.CLASIFICACION_3_DES
-		ORDER BY 
-			agr, promvtas DESC
 			) AS base
 		ON ( cli.CLIENTE = base.CLIENTE )
 	LEFT JOIN 

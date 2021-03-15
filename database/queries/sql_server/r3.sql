@@ -14,7 +14,7 @@ LEFT JOIN
 		(
 	 		SELECT 
 			 	x.CLIENTE as CLIENTE, 
-			 	x.U_Agrupacion AS agr,
+			 	x.NOMBRE AS agr,
 			 	x.CLASIFICACION_3_DES AS MARCA,
 			 	(SUM(x.VTAS) / NULLIF(COUNT( DISTINCT( MONTH(x.FECHA) ) ), 0)  ) AS promvtas
 			FROM base_oic2 AS x
@@ -23,14 +23,14 @@ LEFT JOIN
 	         AND
             (x.VTAS > 0 OR x.VTAS < 0)
          GROUP BY 
-	         x.CLIENTE, x.U_Agrupacion, x.CLASIFICACION_3_DES
+	         x.CLIENTE, x.NOMBRE, x.CLASIFICACION_3_DES
 			) AS base
 	ON ( cli.CLIENTE = base.CLIENTE )
 LEFT JOIN 
 		(
 	 		SELECT
 			 	x.CLIENTE as CLIENTE, 
-			 	x.U_Agrupacion AS agr,
+			 	x.NOMBRE AS agr,
 				x.CLASIFICACION_3_DES AS MARCA,
 			 	SUM(x.VTAS) AS sumvtas
 			FROM base_oic2 AS x
@@ -39,7 +39,7 @@ LEFT JOIN
 				AND
             (x.VTAS > 0 OR x.VTAS < 0)
          GROUP BY 
-	         x.CLIENTE, x.U_Agrupacion, x.CLASIFICACION_3_DES
+	         x.CLIENTE, x.NOMBRE, x.CLASIFICACION_3_DES
 			) AS base2
 	ON ( cli.CLIENTE = base2.CLIENTE AND base.MARCA = base2.MARCA )
 	

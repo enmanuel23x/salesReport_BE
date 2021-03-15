@@ -1,6 +1,6 @@
 SELECT 
  	base.agr AS 'Agrupación',
- 	ROUND(((base.promvtas / hbl.days)*5),2) AS 'PROMEDIO VTA SEMANAL',
+ 	SUM(ROUND(((base.promvtas / hbl.days)*5),2)) AS 'PROMEDIO VTA SEMANAL',
  	ROUND(semana.sumvtas,2) AS 'VENTA SEMANA 1',
  	ROUND(( semana.sumvtas*100 / NULLIF(((base.promvtas / hbl.days)*5) , 0) ),2) AS 'ALCANCE',
  	vendedor.COD AS 'Codigo Vendedor',
@@ -16,7 +16,8 @@ LEFT JOIN
 LEFT JOIN 
 		(
 	 		SELECT 
-			 	x.U_Agrupacion AS agr, 
+			 	x.CLIENTE as CLIENTE,
+			 	x.NOMBRE AS agr, 
       		(
 					(SUM(x.VTAS) / NULLIF(COUNT( DISTINCT( MONTH(x.FECHA) ) ), 0)  )
 					*1
@@ -29,15 +30,15 @@ LEFT JOIN
 	            AND
                 (x.VTAS > 0 OR x.VTAS < 0)
                 AND
-				x.U_Agrupacion IS NOT NULL
+				x.NOMBRE IS NOT NULL
             GROUP BY 
-	            x.U_Agrupacion
+	            x.NOMBRE, x.CLIENTE
 			) AS base
-	ON  ( cli.RAZON_SOCIAL = base.agr )
+	ON  ( cli.CLIENTE = base.CLIENTE )
 	
 	LEFT JOIN (
 		SELECT 
-			 	x.U_Agrupacion AS agr,
+			 	x.NOMBRE AS agr,
 				SUM(x.VTAS)  AS sumvtas
 
             FROM 
@@ -51,9 +52,9 @@ LEFT JOIN
 	           	AND
                (x.VTAS > 0 OR x.VTAS < 0)
                AND
-				x.U_Agrupacion IS NOT NULL
+				x.NOMBRE IS NOT NULL
             GROUP BY 
-	            x.U_Agrupacion
+	            x.NOMBRE
 		) AS semana
 	ON ( cli.RAZON_SOCIAL = semana.agr )
 	
@@ -68,8 +69,6 @@ LEFT JOIN
 	ON ( cli.CODIGO_VENDEDOR = vendedor.COD )
 	WHERE 
 		base.agr IS NOT NULL
-		AND 
-		ROUND(( semana.sumvtas*100 / NULLIF(((base.promvtas / hbl.days)*5) , 0) ),2) <= 70
-	GROUP BY base.agr, base.promvtas, semana.sumvtas, hbl.days, vendedor.COD, vendedor.NOMBRE, vendedor.ACTIVO
-	ORDER BY cli.RAZON_SOCIAL
+	GROUP BY base.agr, semana.sumvtas
+	ORDER BY cli.CLIENTE
 	;
