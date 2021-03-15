@@ -26,7 +26,7 @@ LEFT JOIN
             FROM 
 	            base_oic2 AS x
             WHERE
-                (x.FECHA BETWEEN (last_day(curdate() - INTERVAL 7 month) + interval 1 DAY) AND last_day(curdate() - INTERVAL 1 month))
+                (x.FECHA BETWEEN (last_day(NOW() - INTERVAL 7 month) + interval 1 DAY) AND last_day(NOW() - INTERVAL 1 month))
 	            AND
                 (x.VTAS > 0 OR x.VTAS < 0)
                 AND

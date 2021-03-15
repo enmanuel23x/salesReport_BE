@@ -27,9 +27,11 @@ LEFT JOIN
 			 	(SUM(x.CANTIDAD) / NULLIF(COUNT( DISTINCT( MONTH(x.FECHA) ) ), 0)  ) AS promvtasu
 			FROM base_oic2 AS x
 			WHERE
-                (x.FECHA BETWEEN (last_day(curdate() - INTERVAL 7 month) + interval 1 DAY) AND last_day(curdate() - INTERVAL 1 month))
+                (x.FECHA BETWEEN (last_day(NOW() - INTERVAL 7 month) + interval 1 DAY) AND last_day(NOW() - INTERVAL 1 month))
 	            AND
                 (x.VTAS > 0 OR x.VTAS < 0)
+				AND 
+				(x.CLASIFICACION_5_DES = 'DOBLE BASICO' OR x.CLASIFICACION_5_DES = 'TRIPLE BASICO')
          GROUP BY 
 	        	x.CLIENTE, x.NOMBRE, x.ARTICULO, x.DESCRIPCION, x.CLASIFICACION_5_DES, x.CLASIFICACION_3_DES
 			) AS base

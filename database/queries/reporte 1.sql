@@ -5,7 +5,7 @@ SELECT
  	ROUND(base.alc*100, 2) AS 'Alcance',
  	vendedor.COD AS 'Codigo Vendedor',
  	vendedor.NOMBRE AS 'Vendedor',
- 	vendedor.ACTIVO AS 'Vendedor Activo',
+  vendedor.ACTIVO AS 'Vendedor Activo',
  	NOW() AS 'Date'
 				
 FROM 
@@ -19,7 +19,7 @@ LEFT JOIN
                 FROM 
                     base_oic2 AS y
                 WHERE
-					(y.FECHA BETWEEN (last_day(curdate() - INTERVAL 2 month) + interval 1 DAY) AND last_day(curdate() - INTERVAL 1 month))
+					(y.FECHA BETWEEN (last_day(NOW() - INTERVAL 2 month) + interval 1 DAY) AND last_day(NOW() - INTERVAL 1 month))
          	        AND
 			        y.NOMBRE = x.NOMBRE
       	        GROUP BY 
@@ -29,7 +29,7 @@ LEFT JOIN
                     base_oic2 AS z
     	        WHERE
 
-                    (z.FECHA BETWEEN (last_day(curdate() - INTERVAL 2 month) + interval 1 DAY) AND last_day(curdate() - INTERVAL 1 month))
+                    (z.FECHA BETWEEN (last_day(NOW() - INTERVAL 2 month) + interval 1 DAY) AND last_day(NOW() - INTERVAL 1 month))
 			        AND
                     z.NOMBRE = x.NOMBRE
 		        GROUP BY 
@@ -37,7 +37,7 @@ LEFT JOIN
             FROM 
 	            base_oic2 AS x
             WHERE
-                (x.FECHA BETWEEN (last_day(curdate() - INTERVAL 7 month) + interval 1 DAY) AND last_day(curdate() - INTERVAL 1 month))
+                (x.FECHA BETWEEN (last_day(NOW() - INTERVAL 7 month) + interval 1 DAY) AND last_day(NOW() - INTERVAL 1 month))
 	            AND
                 (x.VTAS > 0 OR x.VTAS < 0)
 				AND
@@ -56,5 +56,8 @@ LEFT JOIN (
 	ON ( cli.CODIGO_VENDEDOR = vendedor.COD )
 WHERE 
 	base.agr IS NOT NULL
+	AND
+	base.alc <= 0.7
+GROUP by base.agr, base.promvtas, base.lastmonth, base.alc, vendedor.COD, vendedor.NOMBRE, vendedor.ACTIVO
 ORDER BY cli.RAZON_SOCIAL
 ;
