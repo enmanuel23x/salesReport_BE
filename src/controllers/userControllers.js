@@ -1,3 +1,5 @@
+const config = require('config.json');
+const jwt = require('jsonwebtoken');
 const pool = require('../../database/conn/database');
 
 module.exports = {
@@ -111,6 +113,42 @@ module.exports = {
                     usrTeleventa: el.usr_televenta
                 }
             }));
+        } catch (error) {
+            console.error(error);
+            res.send("ERROR");
+        }
+    },
+    async Auth(req, res, next) {
+        try {
+            const {email} = req.body;
+            const query = `
+                SELECT 
+	                us.*, cli.cli_name AS cli_name 
+                FROM 
+	                users AS us 
+                LEFT JOIN 
+	                (SELECT * FROM clients) 
+		            AS cli 
+                ON 
+                    (us.cli_id = cli.cli_id)
+                WHERE 
+	                usr_email = "${email}" ;
+            `
+            const result = await pool.query(query);
+            res.json(result.length == 0 ? {} : { 
+                usrId: result[0].usr_id,
+                usrName: result[0].usr_name,
+                usrLastName: result[0].usr_last_name,
+                usrEmail: result[0].usr_email,
+                usrRol: result[0].usr_rol,
+                usrStatus: result[0].usr_status,
+                cliId: result[0].cli_id,
+                cliName: result[0].cli_name,
+                usrSellerCode: result[0].usr_code_seller,
+                usrIdSupervisor:result[0].usr_id_supervisor,
+                usrTeleventa: result[0].usr_televenta,
+                token: jwt.sign({ sub: result[0].usr_id }, config.secret)}
+            );
         } catch (error) {
             console.error(error);
             res.send("ERROR");
