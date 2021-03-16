@@ -14,6 +14,7 @@ const uriReport5Client = '/report_5/client';
 const uriReport_3Top20Clients = '/report_3/top20clients';
 const uriReport_4Top20Clients = '/report_4/top20clients';
 const uriReport5Month = '/report_5/month';
+const uriReportDate = '/report_date/:rpt_date';
 
 reportsRouter.route(uriReport_1)
     .post(reportsController.get_report_1)
@@ -50,7 +51,8 @@ reportsRouter.route(uriReport5Client)
 
 reportsRouter.route(uriReport5Month)
     .post(reportsController.get_report_5_month)
-
+reportsRouter.route(uriReportDate)
+    .get(reportsController.get_report_date)
     
 
 

@@ -7,16 +7,13 @@ module.exports = {
         
         try {
             
-            const { ABC, SellerActive, SellerName, Rol, SellerCode,UsrId } = req.body;
+            const { ABC, SellerName, Rol, SellerCode,UsrId } = req.body;
             let data='';
 
             let terms ='';
             let query = ''
             dataresp=[]
             
-            if( SellerActive != undefined){
-                terms += ` AND rpt1_seller_active = "` + SellerActive + `"`;
-            } 
             if( ABC != undefined){
                 terms += ` AND rpt1_abc RLIKE "` + ABC + `"`;
             }
@@ -119,7 +116,7 @@ module.exports = {
 
         try {
 
-            const {Month, ABC, SellerActive, SellerName, Rol, SellerCode,UsrId } = req.body;
+            const {Month, ABC, SellerName, Rol, SellerCode,UsrId } = req.body;
             let data='';
 
             let terms ='';
@@ -128,9 +125,6 @@ module.exports = {
             
             terms += `WHERE rpt2_group IS NOT NULL `
 
-            if( SellerActive != undefined){
-                terms += ` AND rpt2_seller_active = "` + SellerActive + `"`;
-            }
             if (Rol == '3'){              //rol de vendedor
                 terms += ` AND rpt2_seller_code = "` + SellerCode + `"`;
             }
@@ -221,8 +215,68 @@ module.exports = {
     async get_report_3_top20_clients (req, res, next) {
 
         try {
-            const { SellerName, SellerCode } = req.body
-            let query = `SELECT 
+            const { SellerName, SellerCode, Rol, UsrId } = req.body
+            let query
+            if(Rol == "1"){
+                query = `SELECT 
+            rpt3_client_code, 
+            rpt3_group,
+           sum(CONVERT(SUBSTRING_INDEX(rpt3_avg_sales,'-',-1),UNSIGNED INTEGER)) AS num  
+        FROM 
+            copyoic.report_3 
+        WHERE 
+            rpt3_group IS NOT NULL
+            ${SellerName != undefined ? ' AND (rpt3_seller_code RLIKE "'+SellerName+'")' : ''}
+        group BY 
+            rpt3_client_code,
+            rpt3_group
+        order BY 
+            num desc limit 20`
+            
+            }else if(Rol == "2"){
+                if(SellerName != undefined){
+                    query = `SELECT 
+                    rpt3_client_code, 
+                    rpt3_group,
+                   sum(CONVERT(SUBSTRING_INDEX(rpt3_avg_sales,'-',-1),UNSIGNED INTEGER)) AS num  
+                FROM 
+                    copyoic.report_3 
+                WHERE 
+                    rpt3_group IS NOT NULL
+                    AND rpt3_seller_code RLIKE "${SellerName}"
+                group BY 
+                    rpt3_client_code,
+                    rpt3_group
+                order BY 
+                    num desc limit 20`
+                }else{
+                    const vendors = await pool.query(`SELECT usr_code_seller FROM copyoic.users where usr_id_supervisor = '${UsrId}'`) 
+                    let s = ""
+                    for (let index = 0; index < vendors.length; index++) {
+                        if(s == ""){
+                            s = vendors[index].usr_code_seller ;
+                        }else{
+                            s += "|" + vendors[index].usr_code_seller;
+                        }
+                    }
+                    query = `SELECT 
+                    rpt3_client_code, 
+                    rpt3_group,
+                   sum(CONVERT(SUBSTRING_INDEX(rpt3_avg_sales,'-',-1),UNSIGNED INTEGER)) AS num  
+                FROM 
+                    copyoic.report_3 
+                WHERE 
+                    rpt3_group IS NOT NULL
+                    AND rpt3_seller_code RLIKE "${s}"
+                group BY 
+                    rpt3_client_code,
+                    rpt3_group
+                order BY 
+                    num desc limit 20`
+                }
+                
+            }else{
+                query = `SELECT 
             rpt3_client_code, 
             rpt3_group,
            sum(CONVERT(SUBSTRING_INDEX(rpt3_avg_sales,'-',-1),UNSIGNED INTEGER)) AS num  
@@ -237,9 +291,11 @@ module.exports = {
             rpt3_group
         order BY 
             num desc limit 20`
+            }
             const result = await pool.query(query)
             
             res.json(result)
+            
         } catch (error) {
             console.error(error)
             res.send("ERROR")
@@ -313,7 +369,7 @@ module.exports = {
                         }
                     }                    
                     sellerName_ = sellerName_.slice(0, -1);
-                    terms += ` AND rpt3_seller RLIKE "` + sellerName_ + `"`;  
+                    terms += ` AND rpt3_seller_code RLIKE "` + sellerName_ + `"`;  
                   }else{
                       const vendors = await pool.query(`SELECT usr_code_seller FROM copyoic.users where usr_rol = '3'`)                    
                       if(vendors.length !== 0){
@@ -388,18 +444,53 @@ module.exports = {
     async get_report_4_top20_clients (req, res, next) {
 
         try { 
-            const { SellerName, SellerCode } = req.body
-            let query = `SELECT rpt4_client_code, rpt4_group,sum(CONVERT(SUBSTRING_INDEX(rpt4_avg_sales,'-',-1),UNSIGNED INTEGER)) AS num  
+            const { SellerName, SellerCode, Rol, UsrId } = req.body
+            let query
+            if(Rol == "1"){
+                query = `SELECT rpt4_client_code, rpt4_group,sum(CONVERT(SUBSTRING_INDEX(rpt4_avg_sales,'-',-1),UNSIGNED INTEGER)) AS num  
+            FROM copyoic.report_4 
+            WHERE rpt4_group IS NOT NULL 
+            ${SellerName != undefined ? ' AND (rpt4_seller_code RLIKE "'+SellerName+'")' : ''}
+            group by rpt4_client_code, rpt4_group
+            order by sum(CONVERT(SUBSTRING_INDEX(rpt4_avg_sales,'-',-1),UNSIGNED INTEGER)) desc limit 20`
+            
+            
+            }else if(Rol == "2"){
+                if(SellerName != undefined){
+                    query = `SELECT rpt4_client_code, rpt4_group,sum(CONVERT(SUBSTRING_INDEX(rpt4_avg_sales,'-',-1),UNSIGNED INTEGER)) AS num  
+            FROM copyoic.report_4 
+            WHERE rpt4_group IS NOT NULL 
+            AND rpt4_seller_code RLIKE "${SellerName}"
+            group by rpt4_client_code, rpt4_group
+            order by sum(CONVERT(SUBSTRING_INDEX(rpt4_avg_sales,'-',-1),UNSIGNED INTEGER)) desc limit 20`
+                }else{
+                    const vendors = await pool.query(`SELECT usr_code_seller FROM copyoic.users where usr_id_supervisor = '${UsrId}'`) 
+                    let s = ""
+                    for (let index = 0; index < vendors.length; index++) {
+                        if(s == ""){
+                            s = vendors[index].usr_code_seller ;
+                        }else{
+                            s += "|" + vendors[index].usr_code_seller;
+                        }
+                    }
+                    query = `SELECT rpt4_client_code, rpt4_group,sum(CONVERT(SUBSTRING_INDEX(rpt4_avg_sales,'-',-1),UNSIGNED INTEGER)) AS num  
+            FROM copyoic.report_4 
+            WHERE rpt4_group IS NOT NULL 
+            AND rpt4_seller_code RLIKE "${s}"
+            group by rpt4_client_code, rpt4_group
+            order by sum(CONVERT(SUBSTRING_INDEX(rpt4_avg_sales,'-',-1),UNSIGNED INTEGER)) desc limit 20`
+                }
+                
+            }else{
+                query = `SELECT rpt4_client_code, rpt4_group,sum(CONVERT(SUBSTRING_INDEX(rpt4_avg_sales,'-',-1),UNSIGNED INTEGER)) AS num  
             FROM copyoic.report_4 
             WHERE rpt4_group IS NOT NULL
             AND
             ${SellerName != undefined ? '(rpt4_seller_code = "'+SellerCode+'" OR rpt4_seller_code RLIKE "'+SellerName+'")' : 'rpt4_seller_code = '+SellerCode}
             group by rpt4_client_code, rpt4_group
             order by sum(CONVERT(SUBSTRING_INDEX(rpt4_avg_sales,'-',-1),UNSIGNED INTEGER)) desc limit 20`
-
-            
+            }
             const result = await pool.query(query)
-            
             res.json(result)
         } catch (error) {
             console.error(error)
@@ -471,7 +562,7 @@ module.exports = {
                         }
                     }                    
                     sellerName_ = sellerName_.slice(0, -1);
-                    terms += ` AND rpt4_seller RLIKE "` + sellerName_ + `"`;  
+                    terms += ` AND rpt4_seller_code RLIKE "` + sellerName_ + `"`;  
                   }else{
                       const vendors = await pool.query(`SELECT usr_code_seller FROM copyoic.users where usr_rol = '3'`)                    
                       if(vendors.length !== 0){
@@ -710,6 +801,40 @@ module.exports = {
         UNION
             SELECT  Date_format( DATE_SUB(base.rpt5_date,INTERVAL '4' MONTH), '%m-%d-%Y') as month FROM (SELECT rpt5_date FROM report_5 LIMIT 1) AS base
             `)       
+            res.json(result)
+        } catch (error) {
+            console.error(error)
+            res.send("ERROR")
+        }
+    },
+    async get_report_date (req, res, next) {
+ 
+        try {
+            const rpt_date = req.params.rpt_date;
+            let tmp = { field: 'rpt1_date', table: 'report_1' }
+            switch (String(rpt_date)) {
+                case "1":
+                    tmp = { field: 'rpt1_date', table: 'report_1' }
+                    break;
+                case "2":
+                    tmp = { field: 'rpt2_date', table: 'report_2' }
+                    break;
+                case "3":
+                    tmp = { field: 'rpt3_date', table: 'report_3' }
+                    break;
+                case "4":
+                    tmp = { field: 'rpt4_date', table: 'report_4' }
+                    break;
+                case "5":
+                    tmp = { field: 'rpt5_date', table: 'report_5' }
+                    break;
+            }
+            const result = await pool.query(`
+                SELECT 
+                    DATE_ADD(${tmp.field} , INTERVAL 2 DAY) AS ${tmp.field} 
+                FROM 
+                    ${tmp.table} 
+                LIMIT 1`)       
             res.json(result)
         } catch (error) {
             console.error(error)
