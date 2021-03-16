@@ -284,8 +284,7 @@ module.exports = {
             copyoic.report_3 
         WHERE 
             rpt3_group IS NOT NULL
-            AND
-            ${SellerName != undefined ? '(rpt3_seller_code = "'+SellerCode+'" OR rpt3_seller_code RLIKE "'+SellerName+'")' : 'rpt3_seller_code = '+SellerCode}
+            ${SellerName != undefined ? 'AND (rpt3_seller_code = "'+SellerCode+'" OR rpt3_seller_code RLIKE "'+SellerName+'")' : (SellerCode != undefined ? 'AND rpt3_seller_code = '+SellerCode : "")}
         group BY 
             rpt3_client_code,
             rpt3_group
@@ -317,7 +316,7 @@ module.exports = {
                 terms += ` AND rpt3_class = "` + Class + `"`;
             }
             if( Brand != undefined){
-                terms += ` AND rpt3_brand = "` + Brand + `"`;
+                terms += ` AND rpt3_brand RLIKE "` + Brand + `"`;
             }
             if (Rol == '3'){              //rol de vendedor
                 terms += ` AND rpt3_seller_code = "` + SellerCode + `"`;
@@ -510,7 +509,7 @@ module.exports = {
                 terms += ` AND rpt4_class = "` + Class + `"`;
             }
             if( Brand != undefined){
-                terms += ` AND rpt4_brand = "` + Brand + `"`;
+                terms += ` AND rpt4_brand RLIKE "` + Brand + `"`;
             }
             if (Rol == '3'){              //rol de vendedor
                 terms += ` AND rpt4_seller_code = "` + SellerCode + `"`;

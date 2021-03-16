@@ -6,6 +6,7 @@ const uriUsers = '/users';
 const uriUsersId = '/users/:id';
 const uriUsersEmail = '/usersEmail/:email';
 const uriUsersSellerByEmail = '/usersSellerByEmail/:email';
+const uriAuth = '/auth';
 const uriUsersByIdSupervisor = '/usersIdSupervisor/:idsupervisor'
 const UserFilterCollaborator = '/usersFilterCollaborator';
 usersRouter.route(uriUsers)
@@ -18,8 +19,9 @@ usersRouter.route(uriUsersId)
     .put(usersController.updateUsers)
     .delete(usersController.deleteUsers);
 usersRouter.route(uriUsersEmail)
-    .get(usersController.getUsersByEmail)
-
+    .get(usersController.getUsersByEmail);
+usersRouter.route(uriAuth)
+    .post(usersController.Auth)
 usersRouter.route(uriUsersSellerByEmail)
     .get(usersController.getUserSellerByEmail)    
 
