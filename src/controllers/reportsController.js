@@ -792,13 +792,13 @@ module.exports = {
  
         try {
             const result = await pool.query(`
+            SELECT  Date_format( DATE_SUB(base.rpt5_date,INTERVAL '0' MONTH), '%m-%d-%Y') as month FROM (SELECT rpt5_date FROM report_5 LIMIT 1) AS base
+        UNION
             SELECT  Date_format( DATE_SUB(base.rpt5_date,INTERVAL '1' MONTH), '%m-%d-%Y') as month FROM (SELECT rpt5_date FROM report_5 LIMIT 1) AS base
         UNION
             SELECT  Date_format( DATE_SUB(base.rpt5_date,INTERVAL '2' MONTH), '%m-%d-%Y') as month FROM (SELECT rpt5_date FROM report_5 LIMIT 1) AS base
         UNION
             SELECT  Date_format( DATE_SUB(base.rpt5_date,INTERVAL '3' MONTH), '%m-%d-%Y') as month FROM (SELECT rpt5_date FROM report_5 LIMIT 1) AS base
-        UNION
-            SELECT  Date_format( DATE_SUB(base.rpt5_date,INTERVAL '4' MONTH), '%m-%d-%Y') as month FROM (SELECT rpt5_date FROM report_5 LIMIT 1) AS base
             `)       
             res.json(result)
         } catch (error) {
